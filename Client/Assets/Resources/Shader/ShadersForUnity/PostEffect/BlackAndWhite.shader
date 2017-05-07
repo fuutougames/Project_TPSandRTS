@@ -44,9 +44,8 @@ Shader "PostEffect/BlackAndWhite"
 			{
 				fixed4 color = tex2D(_MainTex, input.uv);
 
-				fixed sum = color.r + color.g + color.b;
-				color = fixed4(sum, sum , sum , 3.0) / 3.0;
-
+				fixed grey = dot(color.rgb, float3(.299, .587, .114));
+				color = fixed4(grey, grey, grey, 1.0f);
 				return color;
 			}
 
