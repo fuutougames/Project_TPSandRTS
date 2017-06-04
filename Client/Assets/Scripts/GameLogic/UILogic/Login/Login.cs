@@ -12,9 +12,9 @@ public class Login : WindowBase {
     public override void Init()
     {
         base.Init();
-        m_ifAcc = m_transInstanceRoot.FindChild("Acc").GetComponent<InputField>();
-        m_objBTNLogin = m_transInstanceRoot.FindChild("BtnLogin").gameObject;
-        m_objBTNExit = m_transInstanceRoot.FindChild("BtnExit").gameObject;
+        m_ifAcc = m_transInstanceRoot.Find("Acc").GetComponent<InputField>();
+        m_objBTNLogin = m_transInstanceRoot.Find("BtnLogin").gameObject;
+        m_objBTNExit = m_transInstanceRoot.Find("BtnExit").gameObject;
         UGUIEvtHandler.AddListener(m_objBTNLogin, UGUIEvtType.POINTER_CLICK, OnLoginClick);
         UGUIEvtHandler.AddListener(m_objBTNExit, UGUIEvtType.POINTER_CLICK, OnExit);
     }

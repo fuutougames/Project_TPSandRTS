@@ -12,7 +12,7 @@ public class MuzzleFlash : MonoBase
     protected override void OnAwake()
     {
         base.OnAwake();
-        flashHolder = this.transform.FindChild("Muzzleflash").gameObject;
+        flashHolder = this.transform.Find("Muzzleflash").gameObject;
     }
 
     protected override void OnStart()

@@ -37,10 +37,10 @@ public partial class WindowMgr
         GameObject uiSceneRoot = GameObject.Find("UGUIRoot");
         GameObject.DontDestroyOnLoad(uiSceneRoot);
         Transform uiSceneRootTrans = uiSceneRoot.transform;
-        m_objRootCanvas = uiSceneRootTrans.FindChild("RootCanvas").gameObject;
-        m_objUICam = uiSceneRootTrans.FindChild("UICamera").gameObject;
-        m_objEventSystem = uiSceneRootTrans.FindChild("RootCanvas/EventSystem").gameObject;
-        m_objWindowRoot = uiSceneRootTrans.FindChild("RootCanvas/WindowRoot").gameObject;
+        m_objRootCanvas = uiSceneRootTrans.Find("RootCanvas").gameObject;
+        m_objUICam = uiSceneRootTrans.Find("UICamera").gameObject;
+        m_objEventSystem = uiSceneRootTrans.Find("RootCanvas/EventSystem").gameObject;
+        m_objWindowRoot = uiSceneRootTrans.Find("RootCanvas/WindowRoot").gameObject;
 
         m_transRootCanvas = m_objRootCanvas.GetComponent<RectTransform>();
         m_transWindowRoot = m_objWindowRoot.GetComponent<RectTransform>();

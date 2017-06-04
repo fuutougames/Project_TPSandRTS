@@ -26,20 +26,20 @@ public class GameUI : MonoBase
     {
         base.OnAwake();
 
-        fadePlane = this.transform.FindChild("Fade").GetComponent<Image>();
-        gameOverUI = this.transform.FindChild("GameOverUI");
-        playButton = gameOverUI.FindChild("PlayAgainButton").GetComponent<Button>();
+        fadePlane = this.transform.Find("Fade").GetComponent<Image>();
+        gameOverUI = this.transform.Find("GameOverUI");
+        playButton = gameOverUI.Find("PlayAgainButton").GetComponent<Button>();
         playButton.onClick.AddListener(StartNewGame);
-        returnButton = gameOverUI.FindChild("ReturnToMenuButton").GetComponent<Button>();
+        returnButton = gameOverUI.Find("ReturnToMenuButton").GetComponent<Button>();
         returnButton.onClick.AddListener(ReturnToMenu);
-        gameOverScoreUI = gameOverUI.FindChild("GameOverScoreUI").GetComponent<Text>();
+        gameOverScoreUI = gameOverUI.Find("GameOverScoreUI").GetComponent<Text>();
 
-        newWaveBanner = this.transform.FindChild("NewwaveBanner").GetComponent<RectTransform>();
-        newWaveTitle = newWaveBanner.FindChild("Title").GetComponent<Text>();
-        newWaveEnemyCount = newWaveBanner.FindChild("EnemyCount").GetComponent<Text>();
+        newWaveBanner = this.transform.Find("NewwaveBanner").GetComponent<RectTransform>();
+        newWaveTitle = newWaveBanner.Find("Title").GetComponent<Text>();
+        newWaveEnemyCount = newWaveBanner.Find("EnemyCount").GetComponent<Text>();
 
-        scoreUI = this.transform.FindChild("ScoreUI").GetComponent<Text>();
-        healthBar = this.transform.FindChild("HealthBar/Bar").GetComponent<RectTransform>();
+        scoreUI = this.transform.Find("ScoreUI").GetComponent<Text>();
+        healthBar = this.transform.Find("HealthBar/Bar").GetComponent<RectTransform>();
         spawner = FindObjectOfType<Spawner>();
         spawner.OnNewWave += OnNewWave;
     }

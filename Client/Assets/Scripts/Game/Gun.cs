@@ -45,8 +45,8 @@ public class Gun : MonoBase
     protected override void OnAwake()
     {
         base.OnAwake();
-        projectTileSpawner = transform.FindChild("Muzzle").GetComponentsInChildren<Transform>();
-        shellEjection = transform.FindChild("ShellEjectionPoint");
+        projectTileSpawner = transform.Find("Muzzle").GetComponentsInChildren<Transform>();
+        shellEjection = transform.Find("ShellEjectionPoint");
         muzzleflash = transform.GetComponent<MuzzleFlash>();
         projectile = ResourceManager.Instance.LoadResource<Projectile>("Prefabs/Bullet");
         shellPrefab = ResourceManager.Instance.LoadResource<Shell>("Prefabs/Shell");

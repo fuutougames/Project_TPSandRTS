@@ -14,7 +14,7 @@ public class GunController : MonoBase
     protected override void OnAwake()
     {
         base.OnAwake();
-        weaponHold = transform.FindChild("WeaponHold");
+        weaponHold = transform.Find("WeaponHold");
         //startingGun = ResourceManager.Instance.LoadResource<Gun>("Prefabs/Gun");
     } 
 
