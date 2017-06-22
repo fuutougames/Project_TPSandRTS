@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : SingletonBase<GameManager>
+public class GameManager : MonoSingleton<GameManager>
 {
     public override void InitSigleton()
     {

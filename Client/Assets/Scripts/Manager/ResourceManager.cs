@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class ResourceManager : SingletonBase<ResourceManager>
+public class ResourceManager : MonoSingleton<ResourceManager>
 {
     public override void InitSigleton()
     {

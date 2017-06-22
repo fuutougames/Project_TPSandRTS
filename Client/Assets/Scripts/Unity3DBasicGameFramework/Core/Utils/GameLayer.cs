@@ -21,4 +21,9 @@ static public class GameLayer
             return LayerMask.NameToLayer("Screen");
         }
     }
+
+    static public int ObstacleCollider
+    {
+        get { return LayerMask.NameToLayer("ObstacleCollider"); }
+    }
 }

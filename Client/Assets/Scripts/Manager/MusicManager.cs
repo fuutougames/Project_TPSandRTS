@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MusicManager : SingletonBase<MusicManager>
+public class MusicManager : MonoSingleton<MusicManager>
 {
     private AudioClip mainTheme;
     private AudioClip menuTheme;

@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+﻿using UnityEngine.Networking;
 
 /// <summary>
-/// The base class for custom game class instead of monobehavior
+/// The base class for custom game class of NetworkBehaviour
 /// </summary>
-public class MonoBase : MonoBehaviour
+public class NetworkBase : NetworkBehaviour
 {
     protected virtual void OnAwake() { }
     protected virtual void OnStart() { }
@@ -35,4 +35,5 @@ public class MonoBase : MonoBehaviour
     {
         OnLateUpdate();
     }
+
 }
