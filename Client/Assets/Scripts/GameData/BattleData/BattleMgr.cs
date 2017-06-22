@@ -1,4 +1,6 @@
-﻿using Battle.Data;
+﻿using System.Collections.Generic;
+using Battle.Data;
+using Boo.Lang;
 using Common;
 
 namespace Battle
@@ -7,6 +9,5 @@ namespace Battle
     {
         private BattleSceneData _SceneData;
         public BattleSceneData SceneData { get { return _SceneData; } }
-
     }
 }

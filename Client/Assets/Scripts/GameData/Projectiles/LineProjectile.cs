@@ -230,7 +230,7 @@ public class LineProjectile : ProjectileBase
             // calculate projectile's time-damage line node and store it;
             float penLen = float.MaxValue;
             Vector3 targetPoint = Vector3.zero;
-            for (int j = 0; j < obstacle.CollideSurfaces.Count; ++j)
+            for (int j = 0; j < obstacle.CollideSurfaces.Length; ++j)
             {
                 Plane plane = obstacle.CollideSurfaces[j];
 

@@ -10,7 +10,7 @@ public class ObstacleData : MonoBase
 {
     [SerializeField] public float Hardness;
     [SerializeField] public bool Penetrable;
-    [SerializeField] public List<Plane> CollideSurfaces;
+    [SerializeField] public Plane[] CollideSurfaces;
     [SerializeField] public BoxCollider Collider;
     [SerializeField] public Transform CachedTrans;
 
@@ -18,7 +18,7 @@ public class ObstacleData : MonoBase
     /// <summary>
     /// Editor only
     /// </summary>
-    public void InitPlaneData()
+    public void Initialize()
     {
         CachedTrans = transform;
         Collider = GetComponent<BoxCollider>();
@@ -34,7 +34,7 @@ public class ObstacleData : MonoBase
         Vector3 yOffset = CachedTrans.up*halfSize.y;
         Vector3 xOffset = CachedTrans.right*halfSize.x;
 
-        CollideSurfaces = new List<Plane>()
+        CollideSurfaces = new Plane[]
         {
             //front
             new Plane(CachedTrans.forward, CachedTrans.position + zOffset),
