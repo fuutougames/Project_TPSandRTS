@@ -9,5 +9,11 @@ namespace Battle
             TYPE_2 = 2,
             TYPE_3 = 3
         }
+
+        public enum DAMAGE_TYPE
+        {
+            BULLET_PENETRATE = 1,
+            EXPLOSIVE = 2
+        }
     }
 }

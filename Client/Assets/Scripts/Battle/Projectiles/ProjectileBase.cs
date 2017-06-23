@@ -1,4 +1,4 @@
-﻿using Data.Config;
+﻿using Battle;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -118,6 +118,18 @@ public class ProjectileBase : NetworkBase
     }
 
     /// <summary>
+    /// Client will need this function too
+    /// </summary>
+    /// <param name="time"></param>
+    /// <param name="characterCollider"></param>
+    /// <returns>Hit Point</returns>
+    public virtual bool IsCollideWithCharacter(float time, CapsuleCollider characterCollider, out Vector3 hitPoint)
+    {
+        hitPoint = Vector3.zero;
+        return true;
+    }
+
+    /// <summary>
     /// Default Projectile Trigger Function;
     /// </summary>
     [Server]
@@ -126,5 +138,22 @@ public class ProjectileBase : NetworkBase
         _SyncIsTriggered = true;
         _IsFirstFrameIgnored = false;
         OnProjectileTrigger();
+    }
+
+
+    [Server]
+    public virtual float CalculateDamage(Vector3 hitPoint, BattleCharacterData character)
+    {
+        return 0;
+    }
+
+    public void RegisterProjectile()
+    {
+        
+    }
+
+    public void UnRegisterProjectile()
+    {
+        
     }
 }

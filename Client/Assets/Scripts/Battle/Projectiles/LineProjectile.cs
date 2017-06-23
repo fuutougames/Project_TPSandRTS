@@ -89,7 +89,7 @@ public class ProjectileDmgLine
     /// <summary>
     /// Get Projectile Current Position By Time
     /// </summary>
-    /// <param name="time">input Time.realtimeFromStartup here</param>
+    /// <param name="time">input TimeMgr.GetCurrentTime() here</param>
     /// <returns></returns>
     public Vector3 GetPositionByTime(float time)
     {
@@ -100,7 +100,7 @@ public class ProjectileDmgLine
     /// <summary>
     /// Get Projectile Remain Damage By Time
     /// </summary>
-    /// <param name="time">input Time.realtimeFromeStartup here</param>
+    /// <param name="time">input TimeMgr.GetCurrentTime() here</param>
     /// <returns></returns>
     public float GetRemainDmgByTime(float time)
     {
@@ -151,7 +151,7 @@ public class LineProjectile : ProjectileBase
     /// </summary>
     protected override void UpdatePosition()
     {
-        CachedTransform.position += _SyncDirection*_Velocity*Time.deltaTime;
+        CachedTransform.position += _SyncDirection*_Velocity*(float)TimeMgr.Instance.GetCurrentTime();
         if (Vector3.Distance(CachedTransform.position, _SyncStartPos) > _SyncRealRange)
         {
             // TODO:dispose or recycle projectile here;
@@ -291,5 +291,26 @@ public class LineProjectile : ProjectileBase
     {
         //TODO: Calculate penetration damage lost;
         return 0;
+    }
+
+    public override bool IsCollideWithCharacter(float time, CapsuleCollider characterCollider, out Vector3 hitPoint)
+    {
+        base.IsCollideWithCharacter(time, characterCollider, out hitPoint);
+        Vector3 projectilePos = _DmgLine.GetPositionByTime(time);
+        if (true)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    [Server]
+    public override float CalculateDamage(Vector3 hitPoint, BattleCharacterData character)
+    {
+        //return base.CalculateDamage(hitPoint, character);
+        return .0f;
     }
 }

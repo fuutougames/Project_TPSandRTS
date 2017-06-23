@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BulletObject : MonoBehaviour {
+public class RotationSync : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
