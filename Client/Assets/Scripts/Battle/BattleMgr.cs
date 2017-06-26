@@ -17,6 +17,10 @@ namespace Battle
             if (BData == null)
                 _BattleData = new BattleData();
             _BattleData.Reset();
+
+            if (SceneData == null)
+                _SceneData = new BattleSceneData();
+            _SceneData.Reset();
         }
 
         protected override void OnAwake()

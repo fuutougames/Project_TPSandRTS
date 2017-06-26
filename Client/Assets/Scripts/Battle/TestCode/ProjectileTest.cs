@@ -12,6 +12,7 @@ public class ProjectileTest : MonoBehaviour {
     public float Penetration = 5;
     public LineProjectile projectile;
     private ProjectileBattleData data;
+    public bool Triggered = false;
 
     void Awake()
     {
@@ -27,6 +28,8 @@ public class ProjectileTest : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
 	{
+	    if (!Triggered)
+	        return;
 	    if (_AccumTime < ShootInterval)
 	    {
             // do nothing
@@ -41,7 +44,25 @@ public class ProjectileTest : MonoBehaviour {
 
         _AccumTime = .0f;
 	    // do shoot;
-        projectile.Init(data);
-        projectile.TriggerProjectile();
+	    ProjectileBase ins = GameObject.Instantiate(projectile.gameObject).GetComponent<ProjectileBase>();
+        ins.Init(data);
+        ins.TriggerProjectile(CachedTransform.position, CachedTransform.forward);
+	}
+
+    public void TriggerProjectiles()
+    {
+        Triggered = !Triggered;
+        _AccumTime = 0;
+    }
+
+    public void RegisterObjects()
+    {
+        GameObject obstacleRoot = GameObject.Find("ObstacleRoot");
+        ObstacleData[] obstacles = obstacleRoot.transform.GetComponentsInChildren<ObstacleData>(true);
+        for (int i = 0; i < obstacles.Length; ++i)
+        {
+            obstacles[i].Initialize();
+            BattleMgr.Instance.SceneData.RegisterObstacle(obstacles[i]);
+        }
     }
 }

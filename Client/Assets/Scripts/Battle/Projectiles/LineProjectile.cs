@@ -155,15 +155,22 @@ public class LineProjectile : ProjectileBase
     /// </summary>
     protected override void UpdatePosition()
     {
+        if (!_SyncIsTriggered)
+            return;
+
         CachedTransform.position += _SyncDirection*_Velocity*(float)TimeMgr.Instance.GetCurrentTime();
-        if (Vector3.Distance(CachedTransform.position, _SyncStartPos) > _SyncRealRange)
+        if (Vector3.Distance(CachedTransform.position, _SyncStartPos) > _RealRange)
         {
             // TODO:dispose or recycle projectile here;
+            DisposeProjectile();
         }
     }
 
     protected override void OnFixedUpdate()
     {
+        if (!_SyncIsTriggered)
+            return;
+
         base.OnFixedUpdate();
         float now = Time.realtimeSinceStartup;
         int curIdx = _DmgLine.GetPassedIdxByTime(now);
@@ -188,7 +195,9 @@ public class LineProjectile : ProjectileBase
     /// </summary>
     protected virtual void OnCollide(ProjectileDmgLineNode node)
     {
-        
+#if UNITY_EDITOR
+        Debug.Log("<color=cyan>Collide: "+node.Obstacle.transform.GetInstanceID()+"</color>");
+#endif
     }
 
     /// <summary>
@@ -200,7 +209,7 @@ public class LineProjectile : ProjectileBase
         base.BeforeProjectileTrigger();
         _DmgLine.ClearNode();
         Ray ray = new Ray(_SyncStartPos, _SyncDirection);
-        RaycastHit[] hits = Physics.RaycastAll(ray, _MaxRange, GameLayer.ObstacleCollider);
+        RaycastHit[] hits = Physics.RaycastAll(ray, _MaxRange, ~GameLayer.ObstacleCollider);
         float dmgRemain = _BaseDamage;
         float projectileStartTime = Time.realtimeSinceStartup;
         _DmgLine.AddNode(projectileStartTime, dmgRemain, null, _SyncStartPos, 0);
@@ -221,9 +230,9 @@ public class LineProjectile : ProjectileBase
             if (!obstacle.Penetrable)
             {
                 _DmgLine.SetStartAndEndTime(projectileStartTime, projectileStartTime + hit.distance/_Velocity);
-                _SyncRealRange = hit.distance;
+                _RealRange = hit.distance;
                 _DmgLine.EndPos = _SyncStartPos + _SyncDirection * hit.distance;
-                _DmgLine.RealRange = _SyncRealRange;
+                _DmgLine.RealRange = _RealRange;
                 _DmgLine.SetStartAndEndTime(projectileStartTime, timeNode);
                 _DmgLine.AddNode(timeNode, 0, obstacle, _DmgLine.EndPos, 0);
                 projectileBlocked = true;
@@ -239,6 +248,7 @@ public class LineProjectile : ProjectileBase
                 Plane plane = obstacle.CollideSurfaces[j];
 
                 //filter surfaces which will never intersect with current ray.
+                float dotResult = Vector3.Dot(plane.normal, ray.direction);
                 if (Vector3.Dot(plane.normal, ray.direction) < .0f)
                     continue;
 
@@ -253,12 +263,17 @@ public class LineProjectile : ProjectileBase
                         targetPoint = point;
                     }
                 }
-                else
-                {
-                    // error tororence;
-                    penLen = 0;
-                    targetPoint = hit.point;
-                }
+                //else
+                //{
+                //    // error tororence;
+                //    penLen = 0;
+                //    targetPoint = hit.point;
+                //}
+            }
+            if (Mathf.Abs(penLen - float.MaxValue) <= Mathf.Epsilon)
+            {
+                penLen = .0f;
+                targetPoint = hit.point;
             }
 
             float dmgLost = CalcDmgLost(obstacle, penLen);
@@ -267,9 +282,9 @@ public class LineProjectile : ProjectileBase
             if (dmgRemain <= 0)
             {
                 // projectile stop here
-                _SyncRealRange = hit.distance;
+                _RealRange = hit.distance;
                 _DmgLine.EndPos = _SyncStartPos + _SyncDirection * hit.distance;
-                _DmgLine.RealRange = _SyncRealRange;
+                _DmgLine.RealRange = _RealRange;
                 _DmgLine.SetStartAndEndTime(projectileStartTime, timeNode);
                 _DmgLine.AddNode(timeNode, 0, obstacle, hit.point, 0);
                 projectileBlocked = true;
@@ -282,7 +297,8 @@ public class LineProjectile : ProjectileBase
         // if projectile is not blocked, it should stop at it's max range;
         if (!projectileBlocked)
         {
-            _DmgLine.EndPos = _SyncStartPos + _SyncDirection*_MaxRange;
+            _RealRange = _MaxRange;
+            _DmgLine.EndPos = _SyncStartPos + _SyncDirection * _MaxRange;
             _DmgLine.RealRange = _MaxRange;
             float timeNode = projectileStartTime + _MaxRange/_Velocity;
             _DmgLine.SetStartAndEndTime(projectileStartTime, timeNode);
@@ -334,5 +350,11 @@ public class LineProjectile : ProjectileBase
     {
         //return base.CalculateDamage(hitPoint, character);
         return .0f;
+    }
+
+    public void DisposeProjectile()
+    {
+        UnRegisterProjectile();
+        GameObject.DestroyImmediate(this.gameObject);
     }
 }

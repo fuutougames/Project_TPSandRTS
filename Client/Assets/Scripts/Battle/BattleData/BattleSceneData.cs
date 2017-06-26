@@ -8,6 +8,13 @@ namespace Battle.Data
     {
         private Dictionary<int, ObstacleData> _ObstacleDict;
 
+        public void Reset()
+        {
+            if (_ObstacleDict == null)
+                _ObstacleDict = new Dictionary<int, ObstacleData>();
+            _ObstacleDict.Clear();
+        }
+
         /// <summary>
         /// Get Obstacle data By Obstacle's transform instance id;
         /// </summary>

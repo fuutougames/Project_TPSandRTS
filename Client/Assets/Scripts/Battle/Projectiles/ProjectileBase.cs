@@ -13,8 +13,9 @@ public class ProjectileBase : NetworkBase
     [SyncVar(hook = "OnProjectileStartPosSet")] protected Vector3 _SyncStartPos;
     [SyncVar(hook = "OnProjectileDirectionSet")] protected Vector3 _SyncDirection;
     [SyncVar(hook = "OnProjectileTerminated")] protected bool _Terminated;
-    [SyncVar] protected float _SyncRealRange;
+    //[SyncVar] protected float _SyncRealRange;
     #endregion
+
 
     #region Inner Var
     protected Transform _CachedTransform;
@@ -29,52 +30,27 @@ public class ProjectileBase : NetworkBase
         }
     }
     protected bool _IsFirstFrameIgnored = false;
+    protected float _RealRange;
     #endregion
 
-
-    protected override void OnUpdate()
-    {
-        base.OnUpdate();
-        if (!_SyncIsTriggered || !_IsFirstFrameIgnored)
-            return;
-
-        UpdatePosition();
-    }
-
-    protected override void OnLateUpdate()
-    {
-        base.OnLateUpdate();
-        if (_SyncIsTriggered && !_IsFirstFrameIgnored)
-        {
-            CachedTransform.position = _SyncStartPos;
-            _IsFirstFrameIgnored = true;
-        }
-    }
-
+    #region Client Server Related
     /// <summary>
-    /// normal init
+    /// Default Projectile Trigger Function;
     /// </summary>
-    public virtual void Init(ProjectileBattleData data)
+    [ServerCallback]
+    public void TriggerProjectile(Vector3 startPos, Vector3 direction)
     {
-        
+        _SyncStartPos = startPos;
+        _SyncDirection = direction;
+        // must call after pos and dir set;
+        BeforeProjectileTrigger();
+        _SyncIsTriggered = true;
+        _IsFirstFrameIgnored = false;
+        _Terminated = false;
+        OnProjectileTrigger();
     }
 
-    ///// <summary>
-    ///// server init
-    ///// </summary>
-    //[Server]
-    //public virtual void ServerInit(object param)
-    //{
-        
-    //}
 
-    /// <summary>
-    /// Position Update Function
-    /// </summary>
-    protected virtual void UpdatePosition()
-    {
-
-    }
 
     [Client]
     protected void OnProjectileTrigger(bool isTrigger)
@@ -108,6 +84,43 @@ public class ProjectileBase : NetworkBase
             // client terminate this projectile
         }
     }
+    #endregion
+
+
+    protected override void OnUpdate()
+    {
+        base.OnUpdate();
+        if (!_SyncIsTriggered || !_IsFirstFrameIgnored)
+            return;
+
+        UpdatePosition();
+    }
+
+    protected override void OnLateUpdate()
+    {
+        base.OnLateUpdate();
+        if (_SyncIsTriggered && !_IsFirstFrameIgnored)
+        {
+            CachedTransform.position = _SyncStartPos;
+            _IsFirstFrameIgnored = true;
+        }
+    }
+
+    /// <summary>
+    /// normal init
+    /// </summary>
+    public virtual void Init(ProjectileBattleData data)
+    {
+        
+    }
+
+    /// <summary>
+    /// Position Update Function
+    /// </summary>
+    protected virtual void UpdatePosition()
+    {
+
+    }
 
     /// <summary>
     /// 
@@ -138,19 +151,6 @@ public class ProjectileBase : NetworkBase
         hitPoint = Vector3.zero;
         return true;
     }
-
-    /// <summary>
-    /// Default Projectile Trigger Function;
-    /// </summary>
-    [Server]
-    public void TriggerProjectile()
-    {
-        _SyncIsTriggered = true;
-        _IsFirstFrameIgnored = false;
-        _Terminated = false;
-        OnProjectileTrigger();
-    }
-
     
     public virtual float CalculateDamage(Vector3 hitPoint, CharacterBattleData character)
     {
@@ -159,11 +159,11 @@ public class ProjectileBase : NetworkBase
 
     public void RegisterProjectile()
     {
-        
+        BattleMgr.Instance.BData.RegisterProjectile(this);
     }
 
     public void UnRegisterProjectile()
     {
-        
+        BattleMgr.Instance.BData.UnRegisterProjectile(this.GetInstanceID());
     }
 }
