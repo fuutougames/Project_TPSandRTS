@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Battle.Data;
-using Boo.Lang;
 using Common;
 
 namespace Battle
@@ -13,10 +12,24 @@ namespace Battle
         private BattleSceneData _SceneData;
         public BattleSceneData SceneData { get { return _SceneData; } }
 
+        public void Reset()
+        {
+            if (BData == null)
+                _BattleData = new BattleData();
+            _BattleData.Reset();
+        }
+
+        protected override void OnAwake()
+        {
+            base.OnAwake();
+            Reset();
+        }
+
         protected override void OnFixedUpdate()
         {
             base.OnFixedUpdate();
             // check if any character need to take damage;
+            _BattleData.UpdateProjectiles();
         }
     }
 }

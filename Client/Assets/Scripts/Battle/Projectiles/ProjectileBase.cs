@@ -12,6 +12,7 @@ public class ProjectileBase : NetworkBase
     [SyncVar(hook = "OnProjectileTrigger")] protected bool _SyncIsTriggered = false;
     [SyncVar(hook = "OnProjectileStartPosSet")] protected Vector3 _SyncStartPos;
     [SyncVar(hook = "OnProjectileDirectionSet")] protected Vector3 _SyncDirection;
+    [SyncVar(hook = "OnProjectileTerminated")] protected bool _Terminated;
     [SyncVar] protected float _SyncRealRange;
     #endregion
 
@@ -29,7 +30,6 @@ public class ProjectileBase : NetworkBase
     }
     protected bool _IsFirstFrameIgnored = false;
     #endregion
-
 
 
     protected override void OnUpdate()
@@ -54,19 +54,19 @@ public class ProjectileBase : NetworkBase
     /// <summary>
     /// normal init
     /// </summary>
-    public virtual void Init()
+    public virtual void Init(ProjectileBattleData data)
     {
         
     }
 
-    /// <summary>
-    /// server init
-    /// </summary>
-    [Server]
-    public virtual void ServerInit(object param)
-    {
+    ///// <summary>
+    ///// server init
+    ///// </summary>
+    //[Server]
+    //public virtual void ServerInit(object param)
+    //{
         
-    }
+    //}
 
     /// <summary>
     /// Position Update Function
@@ -97,6 +97,16 @@ public class ProjectileBase : NetworkBase
     {
         _SyncDirection = direction;
         CachedTransform.forward = _SyncDirection;
+    }
+
+    [Client]
+    protected void OnProjectileTerminated(bool terminated)
+    {
+        _Terminated = terminated;
+        if (_Terminated)
+        {
+            // client terminate this projectile
+        }
     }
 
     /// <summary>
@@ -137,12 +147,12 @@ public class ProjectileBase : NetworkBase
     {
         _SyncIsTriggered = true;
         _IsFirstFrameIgnored = false;
+        _Terminated = false;
         OnProjectileTrigger();
     }
 
-
-    [Server]
-    public virtual float CalculateDamage(Vector3 hitPoint, BattleCharacterData character)
+    
+    public virtual float CalculateDamage(Vector3 hitPoint, CharacterBattleData character)
     {
         return 0;
     }

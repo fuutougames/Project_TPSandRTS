@@ -54,11 +54,11 @@ public class ObstacleData : MonoBase
 
     void OnEnable()
     {
-        BattleMgr.Instance.SceneData.RegisterObstacle(this);
+        //BattleMgr.Instance.SceneData.RegisterObstacle(this);
     }
 
     void OnDisable()
     {
-        BattleMgr.Instance.SceneData.UnRegisterObstacle(this);
+        //BattleMgr.Instance.SceneData.UnRegisterObstacle(this);
     }
 }

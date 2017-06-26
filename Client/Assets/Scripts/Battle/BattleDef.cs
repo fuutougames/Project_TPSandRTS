@@ -15,5 +15,10 @@ namespace Battle
             BULLET_PENETRATE = 1,
             EXPLOSIVE = 2
         }
+
+        public enum PROJECTIL_TYPE
+        {
+            LINEAR = 1
+        }
     }
 }

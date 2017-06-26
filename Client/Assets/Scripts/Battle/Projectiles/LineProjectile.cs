@@ -126,23 +126,27 @@ public class LineProjectile : ProjectileBase
     private ProjectileDmgLine _DmgLine;
     public Action<ProjectileDmgLineNode> OnCollideAction;
 
-    /// <summary>
-    /// Init SERVER ONLY infos, which is those sync var;
-    /// </summary>
-    /// <param name="param"></param>
-    [Server]
-    public override void ServerInit(object param)
-    {
-        base.ServerInit(param);
-    }
+    ///// <summary>
+    ///// Init SERVER ONLY infos, which is those sync var;
+    ///// </summary>
+    ///// <param name="param"></param>
+    //[Server]
+    //public override void ServerInit(object param)
+    //{
+    //    base.ServerInit(param);
+    //}
 
     /// <summary>
     /// Init CLIENT & SERVER infos, like _BaseDamage, _Velocity, etc ...
     /// </summary>
-    public override void Init()
+    public override void Init(ProjectileBattleData data)
     {
-        base.Init();
+        base.Init(data);
         _DmgLine = new ProjectileDmgLine();
+        _BaseDamage = data.BaseDamage;
+        _Velocity = data.Velocity;
+        _MaxRange = data.MaxRange;
+        _Penetration = data.Penetration;
     }
 
     /// <summary>
@@ -285,8 +289,14 @@ public class LineProjectile : ProjectileBase
             _DmgLine.AddNode(timeNode, dmgRemain, null, _DmgLine.EndPos, 0);
         }
     }
-
-    [Server]
+    
+    /// <summary>
+    /// Calculate the damage lost after bullet go through an obstacle;
+    /// both server and client will need this function
+    /// </summary>
+    /// <param name="obstacle"></param>
+    /// <param name="penLen"></param>
+    /// <returns></returns>
     protected float CalcDmgLost(ObstacleData obstacle, float penLen)
     {
         //TODO: Calculate penetration damage lost;
@@ -297,18 +307,30 @@ public class LineProjectile : ProjectileBase
     {
         base.IsCollideWithCharacter(time, characterCollider, out hitPoint);
         Vector3 projectilePos = _DmgLine.GetPositionByTime(time);
+        Vector3 projectilePosNext = _DmgLine.GetPositionByTime(time + Time.fixedDeltaTime);
+        Vector3 characterPos = characterCollider.transform.position;
+        // not even in damage segment range;
+        if (Vector3.Dot(_SyncDirection, characterPos - projectilePos) < 0 
+            || Vector3.Dot(_SyncDirection, characterPos - projectilePosNext) > 0)
+        {
+            return false;
+        }
+
+
         if (true)
         {
+            // unregister projectile here
+            // 
             return true;
         }
         else
         {
+            // do nothing, just return false;
             return false;
         }
     }
-
-    [Server]
-    public override float CalculateDamage(Vector3 hitPoint, BattleCharacterData character)
+    
+    public override float CalculateDamage(Vector3 hitPoint, CharacterBattleData character)
     {
         //return base.CalculateDamage(hitPoint, character);
         return .0f;
