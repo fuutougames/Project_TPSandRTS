@@ -1,14 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Battle;
-using UnityEngine;
-using UnityEngine.Networking;
-
-public class ProjectileBattleData
+﻿namespace Battle.Data
 {
-    public BattleDef.PROJECTIL_TYPE PType;
-    public float BaseDamage;
-    public float Velocity;
-    public float MaxRange;
-    public float Penetration;
+    public class ProjectileBattleData
+    {
+        public BattleDef.PROJECTILE_TYPE PType;
+        public float BaseDamage;
+        public float Velocity;
+        public float MaxRange;
+        public float Penetration;
+    }
 }

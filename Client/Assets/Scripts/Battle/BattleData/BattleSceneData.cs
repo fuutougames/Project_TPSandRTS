@@ -7,6 +7,7 @@ namespace Battle.Data
     public class BattleSceneData
     {
         private Dictionary<int, ObstacleData> _ObstacleDict;
+        private Dictionary<int, DynamicObstacleData> _DynamicObstacleDict; 
 
         public void Reset()
         {

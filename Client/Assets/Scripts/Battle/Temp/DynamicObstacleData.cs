@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Data.DataIns
+public class DynamicObstacleData : MonoBase
 {
-    public class GunBase
-    {
-
-    }
+    
 }
-

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Battle
+namespace Battle.Data
 {
     public class CharacterBattleData : NetworkBase
     {
@@ -12,7 +12,17 @@ namespace Battle
         [SyncVar(hook = "OnPlayerLiveStateChanged")] private bool _SyncIsDead;
         #endregion
 
-        public CapsuleCollider CCollider;
+        private CapsuleCollider _CCollider;
+
+        public CapsuleCollider CCollider
+        {
+            get
+            {
+                if (_CCollider == null)
+                    _CCollider = gameObject.GetComponent<CapsuleCollider>();
+                return _CCollider;
+            }
+        }
 
         [Client]
         private void OnHPChanged(float hp)
@@ -37,7 +47,7 @@ namespace Battle
         public void TakeDamage(float dmg, BattleDef.DAMAGE_TYPE dmgType)
         {
 #if _DEBUG
-            Debug.Log("Damage Taken!!!");
+            //Debug.Log("Damage Taken!!!");
 #endif
 
             float hp = _SyncHP - dmg;

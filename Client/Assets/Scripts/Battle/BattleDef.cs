@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 namespace Battle
 {
     public class BattleDef
@@ -16,9 +18,25 @@ namespace Battle
             EXPLOSIVE = 2
         }
 
-        public enum PROJECTIL_TYPE
+        public enum PROJECTILE_TYPE
         {
-            LINEAR = 1
+            LINEAR = 1,
+            MISSILE = 2,
+            SECTOR = 3,
         }
+
+        public enum PROJECTILE_HITTYPE
+        {
+            NONE = -1,
+            IN = 0,
+            OUT = 1,
+            PENETRATE = 2
+        }
+
+        // not really need it right now
+        //public static readonly HashSet<PROJECTILE_TYPE> HitOnceOnlyProjectile = new HashSet<PROJECTILE_TYPE>()
+        //{
+
+        //};
     }
 }

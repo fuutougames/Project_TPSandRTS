@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Data.DataIns
+namespace Battle.Guns
 {
-    public class AssultRifleData : GunBase
+    using Projectiles;
+    public class AssultRifle : GunBase
     {
 
     }

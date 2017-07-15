@@ -5,6 +5,17 @@
 /// </summary>
 public class MonoBase : MonoBehaviour
 {
+    private Transform _CachedTransform;
+    public Transform CachedTransform
+    {
+        get
+        {
+            if (_CachedTransform == null)
+                _CachedTransform = transform;
+            return _CachedTransform;
+        }
+    }
+
     protected virtual void OnAwake() { }
     protected virtual void OnStart() { }
     protected virtual void OnUpdate() { }

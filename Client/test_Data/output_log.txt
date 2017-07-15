@@ -1,0 +1,38 @@
+Initialize engine version: 5.6.1f1 (2860b30f0b54)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: Intel(R) Iris(TM) Graphics 540 (ID=0x1926)
+    Vendor:   Intel
+    VRAM:     2157 MB
+    Driver:   20.19.15.4463
+Begin MonoManager ReloadAssembly
+Platform assembly: C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
+Platform assembly: C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+Platform assembly: C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\UnityEngine.Analytics.dll (this message is harmless)
+Loading C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
+- Completed reload, in  0.176 seconds
+Platform assembly: C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: C:\Data\Projects\Game Proj\Project_TPSandRTS\Client\test_Data\Managed\System.dll (this message is harmless)
+OnLevelWasLoaded was found on MusicManager
+This message has been deprecated and will be removed in a later version of Unity.
+Add a delegate to SceneManager.sceneLoaded instead to get notifications after scene loading has completed
+ 
+(Filename:  Line: 376)
+
+<RI> Initializing input.
+<RI> Input initialized.
+desktop: 2736x1824 60Hz; virtual: 4656x1830 at -1920,0
+<RI> Initialized touch support.
+UnloadTime: 7.376702 ms
+Setting up 2 worker threads for Enlighten.
+  Thread -> id: 5620 -> priority: 1 
+  Thread -> id: 40b8 -> priority: 1 

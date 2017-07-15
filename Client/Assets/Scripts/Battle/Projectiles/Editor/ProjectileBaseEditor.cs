@@ -2,6 +2,8 @@
 #if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
+using Battle.Projectiles;
+
 
 [CustomEditor(typeof(ProjectileBase))]
 [CanEditMultipleObjects]

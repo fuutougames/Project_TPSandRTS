@@ -29,9 +29,9 @@ namespace Battle
             Reset();
         }
 
-        protected override void OnFixedUpdate()
+        protected override void OnUpdate()
         {
-            base.OnFixedUpdate();
+            base.OnUpdate();
             // check if any character need to take damage;
             _BattleData.UpdateProjectiles();
         }

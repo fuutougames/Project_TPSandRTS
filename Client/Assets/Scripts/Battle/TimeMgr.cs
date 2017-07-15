@@ -6,6 +6,11 @@ public class TimeMgr : MonoSingleton<TimeMgr> {
 
     public float GetCurrentTime ()
     {
+        return Time.realtimeSinceStartup;
+    }
+
+    public float GetDeltaTime ()
+    {
         return Time.deltaTime;
     }
 }

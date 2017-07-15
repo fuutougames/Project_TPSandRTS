@@ -16,6 +16,10 @@ public class ProjectileTestEditor : Editor {
         {
             ((ProjectileTest)target).RegisterObjects();
         }
+        if (GUILayout.Button("Register Characters"))
+        {
+            ((ProjectileTest)target).RegisterCharacters();
+        }
         if (GUILayout.Button("Trigger"))
         {
             ((ProjectileTest)target).TriggerProjectiles();

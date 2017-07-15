@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Battle;
+using Battle.Data;
+using Battle.Projectiles;
 using UnityEngine;
 
 public class ProjectileTest : MonoBehaviour {
@@ -10,7 +12,7 @@ public class ProjectileTest : MonoBehaviour {
     public float Velocity = 400.0f;
     public float MaxRange = 1000;
     public float Penetration = 5;
-    public LineProjectile projectile;
+    public LinearProjectile projectile;
     private ProjectileBattleData data;
     public bool Triggered = false;
 
@@ -18,7 +20,7 @@ public class ProjectileTest : MonoBehaviour {
     {
         CachedTransform = transform;
         data = new ProjectileBattleData();
-        data.PType = BattleDef.PROJECTIL_TYPE.LINEAR;
+        data.PType = BattleDef.PROJECTILE_TYPE.LINEAR;
         data.BaseDamage = 100.0f;
         data.Velocity = Velocity;
         data.MaxRange = MaxRange;
@@ -47,7 +49,7 @@ public class ProjectileTest : MonoBehaviour {
 	    ProjectileBase ins = GameObject.Instantiate(projectile.gameObject).GetComponent<ProjectileBase>();
         ins.Init(data);
         ins.TriggerProjectile(CachedTransform.position, CachedTransform.forward);
-	}
+    }
 
     public void TriggerProjectiles()
     {
@@ -63,6 +65,16 @@ public class ProjectileTest : MonoBehaviour {
         {
             obstacles[i].Initialize();
             BattleMgr.Instance.SceneData.RegisterObstacle(obstacles[i]);
+        }
+    }
+
+    public void RegisterCharacters()
+    {
+        GameObject characterRoot = GameObject.Find("PlayerRoot");
+        CharacterBattleData[] characters = characterRoot.transform.GetComponentsInChildren<CharacterBattleData>(true);
+        for (int i = 0; i < characters.Length; ++i)
+        {
+            BattleMgr.Instance.BData.RegisterCharacter(characters[i]);
         }
     }
 }
