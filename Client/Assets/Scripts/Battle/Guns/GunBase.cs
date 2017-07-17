@@ -55,6 +55,9 @@ namespace Battle.Guns
             
         }
 
+        /// <summary>
+        /// single shot
+        /// </summary>
         public void Fire()
         {
             //base.Fire();
@@ -66,10 +69,16 @@ namespace Battle.Guns
             // fire
             // TODO: Calculate fire direction by accuracy value
             // temporary projectile creation, there should be a better way to instantiate a projectile
+
+            float maxOffset = (float)2*1/_GBData.Accuracy;
+            float offset = maxOffset * (float)GlobalInstances.Instance.RndIns.norm();
+
             ProjectileBase projectile = CreateProjectile();
             // temporary trigger
             projectile.Init(_PBData);
-            projectile.TriggerProjectile(MuzzleTrans.position, MuzzleTrans.forward);
+            // calculate it with angle instead of xy offset;
+            Vector3 direction = (MuzzleTrans.forward + MuzzleTrans.right*offset + MuzzleTrans.up*offset).normalized;
+            projectile.TriggerProjectile(MuzzleTrans.position, direction);
             OnFire();
         }
 
