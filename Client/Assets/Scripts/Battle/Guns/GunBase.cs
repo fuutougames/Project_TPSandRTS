@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Battle.Data;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace Battle.Guns
         /// <summary>
         /// projectile template
         /// </summary>
-        [SerializeField] private LinearProjectile _Projectile;
+        [SerializeField] private BattleDef.PROJECTILE_TYPE _ProjectileType;
 
         private GunBattleData _GBData;
 
@@ -67,24 +68,36 @@ namespace Battle.Guns
 
             _LastFireTime = now;
             // fire
-            // TODO: Calculate fire direction by accuracy value
-            // temporary projectile creation, there should be a better way to instantiate a projectile
-
+            // TODO: Calculate maxOffset by accuracy value
             float maxOffset = (float)2*1/_GBData.Accuracy;
             float offset = maxOffset * (float)GlobalInstances.Instance.RndIns.norm();
-
+            float maxHalfOffsetAngle = 45;
+            float realOffsetAngle = maxHalfOffsetAngle*offset;
+            float rotate = 360*(float) GlobalInstances.Instance.RndIns.norm();
+            Quaternion quatOffset = Quaternion.AngleAxis(realOffsetAngle, MuzzleTrans.right);
+            Quaternion quatRotate = Quaternion.AngleAxis(rotate, MuzzleTrans.forward);
+            Vector3 direction = quatRotate*quatOffset*MuzzleTrans.forward;
             ProjectileBase projectile = CreateProjectile();
             // temporary trigger
             projectile.Init(_PBData);
             // calculate it with angle instead of xy offset;
-            Vector3 direction = (MuzzleTrans.forward + MuzzleTrans.right*offset + MuzzleTrans.up*offset).normalized;
             projectile.TriggerProjectile(MuzzleTrans.position, direction);
             OnFire();
         }
 
         private ProjectileBase CreateProjectile()
         {
-            return GameObject.Instantiate(_Projectile);
+            // temporary projectile creation, there should be a better way to instantiate a projectile
+            // TODO: Poolize peojectile;
+            //return GameObject.Instantiate(_Projectile);
+            MonoObjPool<ProjectileBase> pool = GlobalObjPools.Instance.GetProjectilePoolByType(_ProjectileType);
+            if (pool == null)
+            {
+#if UNITY_EDITOR
+                throw new Exception("Pool not Initialize!!!");
+#endif
+            }
+            return pool.Pop();
         }
 
         public virtual void Reload()

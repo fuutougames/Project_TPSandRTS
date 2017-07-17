@@ -1,4 +1,5 @@
-﻿using Battle;
+﻿using System;
+using Battle;
 using Data.Const;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -11,7 +12,7 @@ namespace Battle.Projectiles
     /// ProjectileBase
     /// Start position, direction, real range and state synchronize;
     /// </summary>
-    public class ProjectileBase : NetworkBase
+    public class ProjectileBase : NetworkBase, IMonoPoolItem
     {
         #region Sync Var
 
@@ -32,12 +33,16 @@ namespace Battle.Projectiles
 
         protected bool _IsFirstFrameIgnored = false;
         protected float _RealRange;
+        [SerializeField]
         protected BattleDef.PROJECTILE_TYPE _ProjectileType;
 
         public BattleDef.PROJECTILE_TYPE ProjectileType
         {
             get { return _ProjectileType; }
         }
+
+        [SerializeField]
+        private TrailRenderer _TrailRenderer;
 
         #endregion
 
@@ -143,7 +148,8 @@ namespace Battle.Projectiles
 
         protected virtual void OnProjectileTrigger()
         {
-
+            if (_TrailRenderer != null)
+                _TrailRenderer.enabled = true;
         }
 
         protected virtual void AfterProjectileTrigger()
@@ -237,7 +243,7 @@ namespace Battle.Projectiles
 
         public void UnRegisterProjectile()
         {
-            BattleMgr.Instance.BData.UnRegisterProjectile(this.GetInstanceID());
+            BattleMgr.Instance.BData.UnRegisterProjectile(this);
         }
 
         /// <summary>
@@ -246,7 +252,39 @@ namespace Battle.Projectiles
         public void DisposeProjectile()
         {
             UnRegisterProjectile();
-            GameObject.DestroyImmediate(this.gameObject);
+            //GameObject.DestroyImmediate(this.gameObject);
         }
+
+        public void OnRealDispose()
+        {
+            MonoObjPool<ProjectileBase> pool = GlobalObjPools.Instance.GetProjectilePoolByType(_ProjectileType);
+            if (pool == null)
+            {
+#if UNITY_EDITOR
+                throw new Exception("Pool not Initialize!!!");
+#endif
+            }
+            pool.Push(this);
+        }
+
+
+        #region Pool Item Interfaces
+        public void OnGet()
+        {
+            //throw new System.NotImplementedException();
+            // do nothing here;
+        }
+
+        public void OnRetrun()
+        {
+            //throw new System.NotImplementedException();
+            if (_TrailRenderer != null)
+            {
+                _TrailRenderer.enabled = false;
+            }
+
+            CachedTransform.position = new Vector3(100000, 100000, 100000);
+        }
+        #endregion
     }
 }

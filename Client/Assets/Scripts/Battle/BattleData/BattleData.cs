@@ -28,7 +28,7 @@ namespace Battle
         private int _HitedCharacterCnt = 0;
         private bool _UpdatingProjectiles = false;
         private readonly List<ProjectileBase> _RegisterBuffer = new List<ProjectileBase>();
-        private readonly List<int> _UnRegisterBuffer = new List<int>(); 
+        private readonly List<ProjectileBase> _UnRegisterBuffer = new List<ProjectileBase>(); 
         public void UpdateProjectiles()
         {
             _UpdatingProjectiles = true;
@@ -162,13 +162,16 @@ namespace Battle
         /// 
         /// </summary>
         /// <param name="instanceId">instacnce id of projectile script</param>
-        public void UnRegisterProjectile(int instanceId)
+        public void UnRegisterProjectile(ProjectileBase projectile)
         {
+            int instanceId = projectile.GetInstanceID();
             if (_UpdatingProjectiles && _ActiveProjectiles.ContainsKey(instanceId))
             {
-                _UnRegisterBuffer.Add(instanceId);
+                _UnRegisterBuffer.Add(projectile);
+                return;
             }
             _ActiveProjectiles.Remove(instanceId);
+            projectile.OnRealDispose();
         }
         #endregion
 
