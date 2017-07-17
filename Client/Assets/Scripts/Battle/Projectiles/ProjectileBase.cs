@@ -19,7 +19,6 @@ namespace Battle.Projectiles
         [SyncVar(hook = "OnProjectileTrigger")] protected bool _SyncIsTriggered = false;
         [SyncVar(hook = "OnProjectileStartPosSet")] protected Vector3 _SyncStartPos;
         [SyncVar(hook = "OnProjectileDirectionSet")] protected Vector3 _SyncDirection;
-        [SyncVar(hook = "OnProjectileTerminated")] protected bool _Terminated;
         //[SyncVar] protected float _SyncRealRange;
 
         #endregion
@@ -44,6 +43,8 @@ namespace Battle.Projectiles
         [SerializeField]
         private TrailRenderer _TrailRenderer;
 
+        private bool _Disposed = false;
+
         #endregion
 
         #region Client Server Related
@@ -60,9 +61,9 @@ namespace Battle.Projectiles
             BeforeProjectileTrigger();
             _SyncIsTriggered = true;
             _IsFirstFrameIgnored = false;
-            _Terminated = false;
             OnProjectileTrigger();
             RegisterProjectile();
+            _Disposed = false;
         }
 
 
@@ -88,16 +89,6 @@ namespace Battle.Projectiles
         {
             _SyncDirection = direction;
             CachedTransform.forward = _SyncDirection;
-        }
-
-        [Client]
-        protected void OnProjectileTerminated(bool terminated)
-        {
-            _Terminated = terminated;
-            if (_Terminated)
-            {
-                // client terminate this projectile
-            }
         }
 
         #endregion
@@ -251,7 +242,10 @@ namespace Battle.Projectiles
         /// </summary>
         public void DisposeProjectile()
         {
+            if (_Disposed)
+                return;
             UnRegisterProjectile();
+            _Disposed = true;
             //GameObject.DestroyImmediate(this.gameObject);
         }
 
@@ -275,7 +269,7 @@ namespace Battle.Projectiles
             // do nothing here;
         }
 
-        public void OnRetrun()
+        public void OnReturn()
         {
             //throw new System.NotImplementedException();
             if (_TrailRenderer != null)

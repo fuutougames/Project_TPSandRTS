@@ -170,8 +170,11 @@ namespace Battle
                 _UnRegisterBuffer.Add(projectile);
                 return;
             }
-            _ActiveProjectiles.Remove(instanceId);
-            projectile.OnRealDispose();
+            if (_ActiveProjectiles.ContainsKey(instanceId))
+            {
+                _ActiveProjectiles.Remove(instanceId);
+                projectile.OnRealDispose();
+            }
         }
         #endregion
 

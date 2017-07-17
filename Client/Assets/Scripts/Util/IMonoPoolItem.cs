@@ -5,5 +5,5 @@ using UnityEngine;
 public interface IMonoPoolItem
 {
     void OnGet();
-    void OnRetrun();
+    void OnReturn();
 }

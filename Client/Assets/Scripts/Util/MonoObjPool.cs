@@ -10,7 +10,7 @@ public class MonoObjPool<T> where T : MonoBehaviour, IMonoPoolItem
 {
     private T m_Template;
 
-    private LinkedList<T> m_LinkArray; 
+    private Stack<T> m_Stack; 
     private int m_MaxSize;
 
 
@@ -20,8 +20,8 @@ public class MonoObjPool<T> where T : MonoBehaviour, IMonoPoolItem
             maxSize = 8;
         m_MaxSize = maxSize;
         m_Template = template;
-        m_LinkArray = new LinkedList<T>();
-        m_Template.OnRetrun();
+        m_Stack = new Stack<T>();
+        m_Template.OnReturn();
     }
 
     private T CreateNewItem()
@@ -33,10 +33,9 @@ public class MonoObjPool<T> where T : MonoBehaviour, IMonoPoolItem
 
     public T Pop()
     {
-        if (m_LinkArray.Count > 0)
+        if (m_Stack.Count > 0)
         {
-            T t = m_LinkArray.First.Value;
-            m_LinkArray.RemoveFirst();
+            T t = m_Stack.Pop();
             t.OnGet();
             return t;
         }
@@ -52,14 +51,14 @@ public class MonoObjPool<T> where T : MonoBehaviour, IMonoPoolItem
     {
         // out of capacity, destroy it immediately
         // Debug.Log("Pushing into pool: " + t.GetInstanceID());
-        if (m_LinkArray.Count >= m_MaxSize)
+        if (m_Stack.Count >= m_MaxSize)
         {
-            t.OnRetrun();
+            t.OnReturn();
             GameObject.DestroyImmediate(t.gameObject);
             return;
         }
 
-        t.OnRetrun();
-        m_LinkArray.AddLast(t);
+        t.OnReturn();
+        m_Stack.Push(t);
     }
 }
