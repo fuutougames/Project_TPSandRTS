@@ -1,6 +1,4 @@
 ﻿using System;
-using Battle;
-using Data.Const;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections.Generic;
@@ -44,6 +42,7 @@ namespace Battle.Projectiles
         private TrailRenderer _TrailRenderer;
 
         private bool _Disposed = false;
+        public bool Disposed { get { return _Disposed; } }
 
         #endregion
 
@@ -143,10 +142,10 @@ namespace Battle.Projectiles
                 _TrailRenderer.enabled = true;
         }
 
-        protected virtual void AfterProjectileTrigger()
-        {
+        //protected virtual void AfterProjectileTrigger()
+        //{
 
-        }
+        //}
 
         #region Show Effect Interfaces
 
@@ -209,7 +208,7 @@ namespace Battle.Projectiles
         #endregion
 
 
-        public virtual float CalculateDamage(Vector3 inPoint, CharacterBattleData character)
+        public virtual float CalculateDamage(CharacterHitData hitData)
         {
             return 0;
         }
@@ -219,7 +218,7 @@ namespace Battle.Projectiles
         /// </summary>
         /// <param name="hitData">hit data list</param>
         /// <param name="hitCnt">return how many character hit data is actually valid</param>
-        /// <returns>is projectile life end</returns>
+        /// <returns>is projectile life end, true end, false not end</returns>
         public virtual bool ProcessHitData(List<CharacterHitData> hitData, out int hitCnt)
         {
             hitCnt = 0;

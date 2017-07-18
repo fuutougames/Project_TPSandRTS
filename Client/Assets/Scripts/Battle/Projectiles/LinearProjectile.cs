@@ -27,10 +27,6 @@ namespace Battle.Projectiles
         {
             base.Init(data);
             _PBData = data;
-            //_BaseDamage = data.BaseDamage;
-            //_Velocity = data.Velocity;
-            //_MaxRange = data.MaxRange;
-            //_Penetration = data.Penetration;
         }
 
         /// <summary>
@@ -56,7 +52,7 @@ namespace Battle.Projectiles
                 return;
 
             base.OnFixedUpdate();
-            float now = Time.realtimeSinceStartup;
+            float now = TimeMgr.Instance.GetCurrentTime();
             int curIdx = _DmgLine.GetPassedIdxByTime(now);
             for (int i = 0; i <= curIdx; ++i)
             {
@@ -73,8 +69,6 @@ namespace Battle.Projectiles
                 }
             }
         }
-
-
 
         /// <summary>
         /// Calculate Projectile's Damage Line before it's triggered;
@@ -101,7 +95,7 @@ namespace Battle.Projectiles
                 if (!obstacle)
                     break;
 
-                float timeNode = projectileStartTime + hit.distance/ _PBData.Velocity;
+                float timeNode = projectileStartTime + hit.distance/_PBData.Velocity;
                 // obstacle not penetrable, projectile stop here;
                 if (!obstacle.Penetrable)
                 {
@@ -395,16 +389,46 @@ namespace Battle.Projectiles
         /// <param name="outPoint"></param>
         /// <param name="character"></param>
         /// <returns></returns>
-        public override float CalculateDamage(Vector3 hitPoint, CharacterBattleData character)
+        public override float CalculateDamage(CharacterHitData hitData)
         {
             //return base.CalculateDamage(hitPoint, character);
             return .0f;
         }
 
-        //public override void DisposeProjectile()
-        //{
-        //    UnRegisterProjectile();
-        //    GameObject.DestroyImmediate(this.gameObject);
-        //}
+        public override bool ProcessHitData(List<CharacterHitData> hitData, out int hitCnt)
+        {
+            hitCnt = 0;
+            float dmgLost = 0;
+            float remainDmg = _DmgLine.GetRemainDmgByTime(TimeMgr.Instance.GetCurrentTime());
+            for (int i = 0; i < hitData.Count; ++i)
+            {
+                if (Mathf.Abs(hitData[i].HitDistance - float.MaxValue) <= Mathf.Epsilon)
+                {
+                    break;
+                }
+                ++hitCnt;
+
+                // calculate damage to all hited characters;
+                float damage = 0;
+                remainDmg -= damage;
+                if (remainDmg <= 0)
+                    damage += remainDmg;
+                dmgLost += damage;
+                if (isServer)
+                    hitData[i].Character.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
+
+                if (remainDmg <= 0)
+                {
+                    _RealRange = Vector3.Distance(hitData[i].HitPoints[0], _SyncStartPos);
+                    return true;
+                }
+            }
+
+            if (remainDmg > 0)
+            {
+                _RealRange = Vector3.Distance(_DmgLine.UpdateDmgLine(TimeMgr.Instance.GetCurrentTime(), dmgLost), _SyncStartPos);
+            }
+            return false;
+        }
     }
 }

@@ -37,6 +37,9 @@ namespace Battle
             // find all collided character, and do the damage calculation and damage line update later;
             while (iter.MoveNext())
             {
+                if (iter.Current.Value.Disposed)
+                    continue;
+
                 _HitedCharacterCnt = 0;
                 ProjectileBase projectile = iter.Current.Value;
                 //bool collideOccur = false;
@@ -77,7 +80,6 @@ namespace Battle
                         ++_HitedCharacterCnt;
                     }
 
-
                     // TODO: if hit dynamic obstacles
                     // this will have to update whole damage line
                 }
@@ -116,20 +118,11 @@ namespace Battle
                             projectile.ProjectileType);
                     }
                 }
-
-                // we have full hit data for current projectile now
-                //if (collideOccur)
-                //    projectilesNeedToRemove.Add(iter.Current.Key);
             }
 
             // don't unregister it here, just set it's real range and let projectile dispose by itself; 
             // real range should be reset in ProcessHitData function
             // mind the [delete element in a loop] problem
-            //for (int i = 0; i < projectilesNeedToRemove.Count; ++i)
-            //    UnRegisterProjectile(projectilesNeedToRemove[i]);
-
-
-
             _UpdatingProjectiles = false;
 
             for (int i = 0; i < _RegisterBuffer.Count; ++i)

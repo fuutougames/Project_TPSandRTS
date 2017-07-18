@@ -138,6 +138,29 @@ namespace Battle.Projectiles
         }
 
         /// <summary>
+        /// update damage line
+        /// </summary>
+        /// <param name="time">input TimeMgr.Instance.GetCurrentTime()</param>
+        /// <param name="dmgLost"></param>
+        /// <returns>last hit point after update</returns>
+        public Vector3 UpdateDmgLine(float time, float dmgLost)
+        {
+            int idx = GetPassedIdxByTime(time);
+            Vector3 retPos = _Nodes[_NodeIdx - 1].TriggerPoint;
+            if (idx >= NodeCount)
+                return retPos;
+            for (int i = idx; i < NodeCount; ++i)
+            {
+                _Nodes[i].RemainDamage -= dmgLost;
+                if (_Nodes[i].RemainDamage <= 0)
+                {
+                    retPos = _Nodes[i].TriggerPoint;
+                }
+            }
+            return retPos;
+        }
+
+        /// <summary>
         /// call to force terminate a DmgLine
         /// </summary>
         public void Terminate()
