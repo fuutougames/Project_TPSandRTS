@@ -107,14 +107,14 @@ namespace Battle
                     CharacterHitData data = _HitedCharacterList[i];
                     if (data.HitType == BattleDef.PROJECTILE_HITTYPE.PENETRATE)
                     {
-                        projectile.OnCharacterCollide(data.Character, data.HitPoints[0], BattleDef.PROJECTILE_HITTYPE.IN, 
+                        data.Character.OnProjectileCollide(projectile, data.HitPoints[0], BattleDef.PROJECTILE_HITTYPE.IN, 
                             projectile.ProjectileType);
-                        projectile.OnCharacterCollide(data.Character, data.HitPoints[1], BattleDef.PROJECTILE_HITTYPE.OUT,
+                        data.Character.OnProjectileCollide(projectile, data.HitPoints[1], BattleDef.PROJECTILE_HITTYPE.OUT,
                             projectile.ProjectileType);
                     }
                     else
                     {
-                        projectile.OnCharacterCollide(data.Character, data.HitPoints[0], data.HitType,
+                        data.Character.OnProjectileCollide(projectile, data.HitPoints[0], data.HitType,
                             projectile.ProjectileType);
                     }
                 }

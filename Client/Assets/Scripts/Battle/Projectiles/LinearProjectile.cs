@@ -11,13 +11,8 @@ namespace Battle.Projectiles
 
     public class LinearProjectile : ProjectileBase
     {
-        // Client know all these data;
-        //private float _BaseDamage;
-        //private float _Velocity;
-        //private float _MaxRange;
-        //private float _Penetration;
-        private ProjectileBattleData _PBData;
-        private ProjectileDmgLine _DmgLine = new ProjectileDmgLine();
+        protected ProjectileBattleData _PBData;
+        protected ProjectileDmgLine _DmgLine = new ProjectileDmgLine();
         public Action<ProjectileDmgLineNode> OnCollideAction;
 
         /// <summary>
@@ -60,7 +55,7 @@ namespace Battle.Projectiles
                 {
                     if (_DmgLine.Nodes[i].Obstacle != null)
                     {
-                        OnStaticObstacleCollide(_DmgLine.Nodes[i].Obstacle, _DmgLine.Nodes[i].TriggerPoint, 
+                        _DmgLine.Nodes[i].Obstacle.OnProjectileCollide(this, _DmgLine.Nodes[i].TriggerPoint,
                             _DmgLine.Nodes[i].HitType, _ProjectileType);
                         if (OnCollideAction != null)
                             OnCollideAction.Invoke(_DmgLine.Nodes[i]);
@@ -178,7 +173,7 @@ namespace Battle.Projectiles
         /// <param name="obstacle"></param>
         /// <param name="penLen"></param>
         /// <returns></returns>
-        protected float CalcDmgLost(ObstacleData obstacle, float penLen)
+        protected virtual float CalcDmgLost(ObstacleData obstacle, float penLen)
         {
             //TODO: Calculate penetration damage lost;
             return 0;
@@ -380,55 +375,6 @@ namespace Battle.Projectiles
         public override bool IsCollideWithDynamicObstacle(float time, DynamicObstacleData doData, out Vector3 hitPoint)
         {
             return base.IsCollideWithDynamicObstacle(time, doData, out hitPoint);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inPoint"></param>
-        /// <param name="outPoint"></param>
-        /// <param name="character"></param>
-        /// <returns></returns>
-        public override float CalculateDamage(CharacterHitData hitData)
-        {
-            //return base.CalculateDamage(hitPoint, character);
-            return .0f;
-        }
-
-        public override bool ProcessHitData(List<CharacterHitData> hitData, out int hitCnt)
-        {
-            hitCnt = 0;
-            float dmgLost = 0;
-            float remainDmg = _DmgLine.GetRemainDmgByTime(TimeMgr.Instance.GetCurrentTime());
-            for (int i = 0; i < hitData.Count; ++i)
-            {
-                if (Mathf.Abs(hitData[i].HitDistance - float.MaxValue) <= Mathf.Epsilon)
-                {
-                    break;
-                }
-                ++hitCnt;
-
-                // calculate damage to all hited characters;
-                float damage = 0;
-                remainDmg -= damage;
-                if (remainDmg <= 0)
-                    damage += remainDmg;
-                dmgLost += damage;
-                if (isServer)
-                    hitData[i].Character.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
-
-                if (remainDmg <= 0)
-                {
-                    _RealRange = Vector3.Distance(hitData[i].HitPoints[0], _SyncStartPos);
-                    return true;
-                }
-            }
-
-            if (remainDmg > 0)
-            {
-                _RealRange = Vector3.Distance(_DmgLine.UpdateDmgLine(TimeMgr.Instance.GetCurrentTime(), dmgLost), _SyncStartPos);
-            }
-            return false;
         }
     }
 }

@@ -13,7 +13,9 @@
             //高爆弹
             HE = 4,
             //霰弹
-            SHOTGUN_AMMO = 5
+            SHOTGUN_AMMO = 5,
+            //火箭弹
+            ROCKET = 6
         }
 
         public enum GUN_TYPE

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Battle.Projectiles;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -57,6 +56,13 @@ namespace Battle.Data
                 _SyncIsDead = true;
             }
             _SyncHP = hp;
+        }
+
+
+        public virtual void OnProjectileCollide(ProjectileBase projectile, Vector3 hitPoint,
+                BattleDef.PROJECTILE_HITTYPE hitType, BattleDef.PROJECTILE_TYPE pType)
+        {
+
         }
     }
 }

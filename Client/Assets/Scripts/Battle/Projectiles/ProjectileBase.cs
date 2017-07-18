@@ -142,49 +142,6 @@ namespace Battle.Projectiles
                 _TrailRenderer.enabled = true;
         }
 
-        //protected virtual void AfterProjectileTrigger()
-        //{
-
-        //}
-
-        #region Show Effect Interfaces
-
-        /// <summary>
-        /// both server and client will run this function 
-        /// when the collide occur, this function will call with collide information
-        /// </summary>
-        public virtual void OnStaticObstacleCollide(ObstacleData data, Vector3 hitPoint,
-            BattleDef.PROJECTILE_HITTYPE hitType, BattleDef.PROJECTILE_TYPE pType)
-        {
-#if UNITY_EDITOR
-            //Debug.Log("<color=cyan>Collide: "+node.Obstacle.transform.GetInstanceID()+"</color>");
-#endif
-        }
-
-
-        /// <summary>
-        /// will be called when collide an dynamic obstacle
-        /// </summary>
-        public virtual void OnDynamicObstacleCollide(DynamicObstacleData data, Vector3 hitPoint,
-            BattleDef.PROJECTILE_HITTYPE hitType, BattleDef.PROJECTILE_TYPE pType)
-        {
-
-        }
-
-        /// <summary>
-        /// will be called when collide an character
-        /// used for effect playing
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="hitPoint"></param>
-        /// <param name="ctype"></param>
-        public virtual void OnCharacterCollide(CharacterBattleData data, Vector3 hitPoint,
-            BattleDef.PROJECTILE_HITTYPE hitType, BattleDef.PROJECTILE_TYPE pType)
-        {
-
-        }
-        #endregion
-
         #region Collide Judge interfaces
         /// <summary>
         /// Client will need this function too
@@ -208,7 +165,7 @@ namespace Battle.Projectiles
         #endregion
 
 
-        public virtual float CalculateDamage(CharacterHitData hitData)
+        public virtual float CalculateDamage(CharacterHitData hitData, float remaniDmg)
         {
             return 0;
         }
@@ -225,7 +182,7 @@ namespace Battle.Projectiles
             return false;
         }
 
-
+        #region Registration and Unregistration
         public void RegisterProjectile()
         {
             BattleMgr.Instance.BData.RegisterProjectile(this);
@@ -235,6 +192,7 @@ namespace Battle.Projectiles
         {
             BattleMgr.Instance.BData.UnRegisterProjectile(this);
         }
+        #endregion
 
         /// <summary>
         /// TODO: Poolize projectiles

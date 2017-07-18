@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Battle;
+using Battle.Projectiles;
 using UnityEngine;
 
 /// <summary>
@@ -57,5 +58,18 @@ public class ObstacleData : MonoBase
     void OnDisable()
     {
         //BattleMgr.Instance.SceneData.UnRegisterObstacle(this);
+    }
+
+    /// <summary>
+    /// when collide with a projectile, this function will be called;
+    /// </summary>
+    /// <param name="hitPoint"></param>
+    /// <param name="projectile"></param>
+    /// <param name="hitType"></param>
+    /// <param name="pType"></param>
+    public virtual void OnProjectileCollide(ProjectileBase projectile, Vector3 hitPoint,
+        BattleDef.PROJECTILE_HITTYPE hitType, BattleDef.PROJECTILE_TYPE pType)
+    {
+        
     }
 }

@@ -14,7 +14,7 @@ public class GlobalObjPools : Singleton<GlobalObjPools>
 
     public GlobalObjPools()
     {
-        GameObject linearProjectile = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Projectiles/LinearProjectileTemplate"));
+        GameObject linearProjectile = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Projectiles/JHPProjectileTemplate"));
         ProjectileBase p = linearProjectile.GetComponent<ProjectileBase>();
         _LinearProjectilPool = new MonoObjPool<ProjectileBase>(p, 1024);
         _ProjectilePools = new Dictionary<BattleDef.PROJECTILE_TYPE, MonoObjPool<ProjectileBase>>()
