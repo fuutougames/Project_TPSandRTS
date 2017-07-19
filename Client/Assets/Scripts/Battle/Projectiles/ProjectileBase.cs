@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections.Generic;
@@ -43,6 +44,8 @@ namespace Battle.Projectiles
 
         private bool _Disposed = false;
         public bool Disposed { get { return _Disposed; } }
+
+        //private bool _DisposeLock = false;
 
         #endregion
 
@@ -208,6 +211,13 @@ namespace Battle.Projectiles
 
         public void OnRealDispose()
         {
+            StartCoroutine(OnDelayRealDispose());
+        }
+
+        private IEnumerator OnDelayRealDispose()
+        {
+            yield return null;
+
             MonoObjPool<ProjectileBase> pool = GlobalObjPools.Instance.GetProjectilePoolByType(_ProjectileType);
             if (pool == null)
             {
@@ -217,7 +227,6 @@ namespace Battle.Projectiles
             }
             pool.Push(this);
         }
-
 
         #region Pool Item Interfaces
         public void OnGet()
