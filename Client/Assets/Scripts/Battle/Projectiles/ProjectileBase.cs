@@ -11,13 +11,13 @@ namespace Battle.Projectiles
     /// ProjectileBase
     /// Start position, direction, real range and state synchronize;
     /// </summary>
-    public class ProjectileBase : NetworkBase, IMonoPoolItem
+    public class ProjectileBase : MonoBase, IMonoPoolItem
     {
         #region Sync Var
 
-        [SyncVar(hook = "OnProjectileTrigger")] protected bool _SyncIsTriggered = false;
-        [SyncVar(hook = "OnProjectileStartPosSet")] protected Vector3 _SyncStartPos;
-        [SyncVar(hook = "OnProjectileDirectionSet")] protected Vector3 _SyncDirection;
+        //[SyncVar(hook = "OnProjectileTrigger")] protected bool _SyncIsTriggered = false;
+        /*[SyncVar(hook = "OnProjectileStartPosSet")]*/ protected Vector3 _SyncStartPos;
+        /*[SyncVar(hook = "OnProjectileDirectionSet")]*/ protected Vector3 _SyncDirection;
         //[SyncVar] protected float _SyncRealRange;
 
         #endregion
@@ -28,8 +28,7 @@ namespace Battle.Projectiles
 
 
         #region Inner Var
-
-        protected bool _IsFirstFrameIgnored = false;
+        //private bool _IsFirstFrameIgnored = false;
         protected float _RealRange;
         [SerializeField]
         protected BattleDef.PROJECTILE_TYPE _ProjectileType;
@@ -40,66 +39,50 @@ namespace Battle.Projectiles
         }
 
         [SerializeField]
-        private TrailRenderer _TrailRenderer;
+        private TrailRenderer _TrailEffect;
 
-        private bool _Disposed = false;
+        protected bool _Disposed = true;
         public bool Disposed { get { return _Disposed; } }
 
+        // frame count after trigger;
+        private int framecnt = 0;
         //private bool _DisposeLock = false;
 
         #endregion
 
-        #region Client Server Related
-
-        /// <summary>
-        /// Default Projectile Trigger Function;
-        /// </summary>
-        [ServerCallback]
         public void TriggerProjectile(Vector3 startPos, Vector3 direction)
         {
             _SyncStartPos = startPos;
             _SyncDirection = direction;
             // must call after pos and dir set;
+            //_SyncIsTriggered = true;
+#if UNITY_EDITOR
+            Debug.LogError("Instance: " + this.GetInstanceID() + " Enable Trail on frame " + framecnt);
+#endif
+            if (_TrailEffect != null)
+                _TrailEffect.enabled = true;
+
+            // Delay triggeration for one frame to make sure trail renderer render correctly;
+            StartCoroutine(OnDelayTrigger());
+        }
+
+        private IEnumerator OnDelayTrigger()
+        {
+            yield return null;
+            CachedTransform.position = _SyncStartPos;
+            CachedTransform.forward = _SyncDirection;
             BeforeProjectileTrigger();
-            _SyncIsTriggered = true;
-            _IsFirstFrameIgnored = false;
-            OnProjectileTrigger();
             RegisterProjectile();
+            framecnt = 0;
             _Disposed = false;
         }
-
-
-
-        [Client]
-        protected void OnProjectileTrigger(bool isTrigger)
-        {
-            bool oldVal = _SyncIsTriggered;
-            _SyncIsTriggered = isTrigger;
-            if (!oldVal)
-                _IsFirstFrameIgnored = false;
-        }
-
-        [Client]
-        protected void OnProjectileStartPosSet(Vector3 startPos)
-        {
-            _SyncStartPos = startPos;
-            CachedTransform.position = _SyncStartPos;
-        }
-
-        [Client]
-        protected void OnProjectileDirectionSet(Vector3 direction)
-        {
-            _SyncDirection = direction;
-            CachedTransform.forward = _SyncDirection;
-        }
-
-        #endregion
 
 
         protected override void OnUpdate()
         {
             base.OnUpdate();
-            if (!_SyncIsTriggered || !_IsFirstFrameIgnored)
+            ++framecnt;
+            if (_Disposed/* || !_IsFirstFrameIgnored*/)
                 return;
 
             UpdatePosition();
@@ -108,11 +91,6 @@ namespace Battle.Projectiles
         protected override void OnLateUpdate()
         {
             base.OnLateUpdate();
-            if (_SyncIsTriggered && !_IsFirstFrameIgnored)
-            {
-                CachedTransform.position = _SyncStartPos;
-                _IsFirstFrameIgnored = true;
-            }
         }
 
         /// <summary>
@@ -137,12 +115,6 @@ namespace Battle.Projectiles
         protected virtual void BeforeProjectileTrigger()
         {
 
-        }
-
-        protected virtual void OnProjectileTrigger()
-        {
-            if (_TrailRenderer != null)
-                _TrailRenderer.enabled = true;
         }
 
         #region Collide Judge interfaces
@@ -206,18 +178,40 @@ namespace Battle.Projectiles
                 return;
             UnRegisterProjectile();
             _Disposed = true;
+            //delay execute to make sure trail renderer is render correctly
+            StartCoroutine(OnDelayDispose());
+            //_SyncIsTriggered = false;
             //GameObject.DestroyImmediate(this.gameObject);
         }
 
-        public void OnRealDispose()
-        {
-            StartCoroutine(OnDelayRealDispose());
-        }
+        //public void OnRealDispose()
+        //{
+        //    StartCoroutine(OnDelayRealDispose());
+        //}
 
-        private IEnumerator OnDelayRealDispose()
+        private IEnumerator OnDelayDispose()
         {
-            yield return null;
+            // all delay here is to make sure trail renderer can render trail correctly
+            int curframe = framecnt;
+            yield return new WaitUntil(() => framecnt >= curframe);
+            if (_TrailEffect != null)
+            {
+                _TrailEffect.enabled = false;
+            }
+#if UNITY_EDITOR
+            Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Dispose on frame " + framecnt);
+#endif
+            yield return new WaitUntil(() => framecnt > curframe + 3);
+            // move it to a remote place, do not change it's active state
+            // Tecnically speaking, this should be done in OnRetrn function, but we need to return
+            // this projectile in next frame to make sure trail renderer won't be activated too early;
+            CachedTransform.position = new Vector3(100000, 100000, 100000);
+#if UNITY_EDITOR
+            Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Move away on frame " + framecnt);
+#endif
 
+
+            yield return new WaitUntil(() => framecnt > curframe + 5);
             MonoObjPool<ProjectileBase> pool = GlobalObjPools.Instance.GetProjectilePoolByType(_ProjectileType);
             if (pool == null)
             {
@@ -225,25 +219,37 @@ namespace Battle.Projectiles
                 throw new Exception("Pool not Initialize!!!");
 #endif
             }
+#if UNITY_EDITOR
+            Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Return on frame " + framecnt);
+#endif
             pool.Push(this);
         }
+
+//        private IEnumerator OnDelayReturn()
+//        {
+//            yield return null;
+//            MonoObjPool<ProjectileBase> pool = GlobalObjPools.Instance.GetProjectilePoolByType(_ProjectileType);
+//            if (pool == null)
+//            {
+//#if UNITY_EDITOR
+//                throw new Exception("Pool not Initialize!!!");
+//#endif
+//            }
+//#if UNITY_EDITOR
+//            Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Return on frame " + framecnt);
+//#endif
+//            pool.Push(this);
+//        }
 
         #region Pool Item Interfaces
         public void OnGet()
         {
-            //throw new System.NotImplementedException();
-            // do nothing here;
+
         }
 
         public void OnReturn()
         {
-            //throw new System.NotImplementedException();
-            if (_TrailRenderer != null)
-            {
-                _TrailRenderer.enabled = false;
-            }
 
-            CachedTransform.position = new Vector3(100000, 100000, 100000);
         }
         #endregion
     }

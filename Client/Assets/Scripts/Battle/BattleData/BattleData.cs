@@ -166,7 +166,6 @@ namespace Battle
             if (_ActiveProjectiles.ContainsKey(instanceId))
             {
                 _ActiveProjectiles.Remove(instanceId);
-                projectile.OnRealDispose();
             }
         }
         #endregion

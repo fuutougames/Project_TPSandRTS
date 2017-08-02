@@ -35,8 +35,8 @@ namespace Battle.Projectiles
                 if (remainDmg <= 0)
                     damage += remainDmg;
                 dmgLost += damage;
-                if (isServer)
-                    hitData[i].Character.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
+                //if (isServer)
+                hitData[i].Character.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
 
                 if (remainDmg <= 0)
                 {

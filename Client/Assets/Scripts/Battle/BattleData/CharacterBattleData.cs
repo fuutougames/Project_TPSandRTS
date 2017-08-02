@@ -41,13 +41,14 @@ namespace Battle.Data
             }
             _SyncIsDead = isDead;
         }
-
-        [ServerCallback]
+        
         public void TakeDamage(float dmg, BattleDef.DAMAGE_TYPE dmgType)
         {
 #if _DEBUG
             //Debug.Log("Damage Taken!!!");
 #endif
+            if (!isServer)
+                return;
 
             float hp = _SyncHP - dmg;
             if (hp < 0)

@@ -30,14 +30,12 @@ namespace Battle.Projectiles
         /// </summary>
         protected override void UpdatePosition()
         {
-            if (!_SyncIsTriggered)
-                return;
-
             Vector3 newPos = CachedTransform.position + _SyncDirection*_PBData.Velocity*TimeMgr.Instance.GetDeltaTime();
             if (Vector3.Distance(newPos, _SyncStartPos) > _RealRange)
             {
                 // TODO:dispose or recycle projectile here;
                 CachedTransform.position = _SyncStartPos + _SyncDirection*_RealRange;
+                Debug.LogError("Instance: " + this.GetInstanceID() + " Exceed Range, Request Dispose");
                 DisposeProjectile();
             }
             else
@@ -48,7 +46,7 @@ namespace Battle.Projectiles
 
         protected override void OnFixedUpdate()
         {
-            if (!_SyncIsTriggered)
+            if (_Disposed)
                 return;
 
             base.OnFixedUpdate();
