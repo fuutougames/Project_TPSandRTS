@@ -88,7 +88,7 @@ namespace Battle.Projectiles
                 RaycastHit hit = hits[i];
                 int instanceId = hit.transform.GetInstanceID();
                 //TODO:Setup Obstacle Data in BattleMgr
-                ObstacleData obstacle = BattleMgr.Instance.SceneData.GetObstacleDataByInstanceID(instanceId);
+                StaticObstacleData obstacle = BattleMgr.Instance.SceneData.GetObstacleDataByInstanceID(instanceId);
                 // if not a stored obstacle, just break for now;
                 if (!obstacle)
                     break;
@@ -176,7 +176,7 @@ namespace Battle.Projectiles
         /// <param name="obstacle"></param>
         /// <param name="penLen"></param>
         /// <returns></returns>
-        protected virtual float CalcDmgLost(ObstacleData obstacle, float penLen)
+        protected virtual float CalcDmgLost(StaticObstacleData obstacle, float penLen)
         {
             //TODO: Calculate penetration damage lost;
             return 0;

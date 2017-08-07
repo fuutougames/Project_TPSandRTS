@@ -14,7 +14,7 @@ public class ProjectileBaseEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        _StartTransform = (Transform) EditorGUILayout.ObjectField(_StartTransform, typeof (Transform));
+        _StartTransform = (Transform) EditorGUILayout.ObjectField("Start Transform: ", _StartTransform, typeof(Transform));
         if (GUILayout.Button("Trigger"))
         {
             //if (_StartTransform != null)

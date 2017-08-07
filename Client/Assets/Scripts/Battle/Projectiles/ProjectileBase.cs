@@ -180,14 +180,7 @@ namespace Battle.Projectiles
             _Disposed = true;
             //delay execute to make sure trail renderer is render correctly
             StartCoroutine(OnDelayDispose());
-            //_SyncIsTriggered = false;
-            //GameObject.DestroyImmediate(this.gameObject);
         }
-
-        //public void OnRealDispose()
-        //{
-        //    StartCoroutine(OnDelayRealDispose());
-        //}
 
         private IEnumerator OnDelayDispose()
         {
@@ -224,22 +217,6 @@ namespace Battle.Projectiles
 #endif
             pool.Push(this);
         }
-
-//        private IEnumerator OnDelayReturn()
-//        {
-//            yield return null;
-//            MonoObjPool<ProjectileBase> pool = GlobalObjPools.Instance.GetProjectilePoolByType(_ProjectileType);
-//            if (pool == null)
-//            {
-//#if UNITY_EDITOR
-//                throw new Exception("Pool not Initialize!!!");
-//#endif
-//            }
-//#if UNITY_EDITOR
-//            Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Return on frame " + framecnt);
-//#endif
-//            pool.Push(this);
-//        }
 
         #region Pool Item Interfaces
         public void OnGet()

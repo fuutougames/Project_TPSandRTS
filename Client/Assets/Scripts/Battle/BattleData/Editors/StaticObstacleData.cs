@@ -8,7 +8,7 @@ using UnityEngine;
 /// static obstacle data
 /// collider center must be vector3.zero
 /// </summary>
-public class ObstacleData : MonoBase
+public class StaticObstacleData : MonoBase
 {
     [SerializeField] public float Hardness;
     [SerializeField] public bool Penetrable;

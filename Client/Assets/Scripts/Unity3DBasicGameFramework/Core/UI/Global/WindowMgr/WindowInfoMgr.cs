@@ -32,3 +32,6 @@ public static class WindowInfoMgr
         return default(WindowInfo);
     }
 }
+
+
+

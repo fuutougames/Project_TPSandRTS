@@ -13,7 +13,7 @@ namespace Battle.Projectiles
         /// <param name="obstacle"></param>
         /// <param name="penLen"></param>
         /// <returns></returns>
-        protected override float CalcDmgLost(ObstacleData obstacle, float penLen)
+        protected override float CalcDmgLost(StaticObstacleData obstacle, float penLen)
         {
             return _PBData.BaseDamage;
         }

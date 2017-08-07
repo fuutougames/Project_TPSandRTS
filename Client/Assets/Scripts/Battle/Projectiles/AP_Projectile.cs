@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Battle.Projectiles
 {
     public class AP_Projectile : LinearProjectile
     {
-        protected override float CalcDmgLost(ObstacleData obstacle, float penLen)
+        protected override float CalcDmgLost(StaticObstacleData obstacle, float penLen)
         {
             return base.CalcDmgLost(obstacle, penLen);
         }
@@ -35,6 +34,7 @@ namespace Battle.Projectiles
                 if (remainDmg <= 0)
                     damage += remainDmg;
                 dmgLost += damage;
+
                 //if (isServer)
                 hitData[i].Character.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
 

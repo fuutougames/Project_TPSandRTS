@@ -60,7 +60,7 @@ public class ProjectileTest : MonoBehaviour {
     public void RegisterObjects()
     {
         GameObject obstacleRoot = GameObject.Find("ObstacleRoot");
-        ObstacleData[] obstacles = obstacleRoot.transform.GetComponentsInChildren<ObstacleData>(true);
+        StaticObstacleData[] obstacles = obstacleRoot.transform.GetComponentsInChildren<StaticObstacleData>(true);
         for (int i = 0; i < obstacles.Length; ++i)
         {
             obstacles[i].Initialize();

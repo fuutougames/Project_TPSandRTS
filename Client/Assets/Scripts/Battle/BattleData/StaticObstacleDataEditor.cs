@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(ObstacleData))]
+[CustomEditor(typeof(StaticObstacleData))]
 [CanEditMultipleObjects]
-public class ObstacleDataEditor : Editor {
+public class StaticObstacleDataEditor : Editor {
 
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
         if (GUILayout.Button("Setup"))
         {
-            ((ObstacleData)target).Initialize();
+            ((StaticObstacleData)target).Initialize();
         }
     }
 }

@@ -8,7 +8,7 @@ using UnityEngine;
 
 public partial class WindowMgr : Singleton<WindowMgr>
 {
-    public struct WinTemplate
+    public class WinTemplate
     {
         public int RefCnt;
         public int ModuleID;
@@ -25,6 +25,10 @@ public partial class WindowMgr : Singleton<WindowMgr>
         {
             WinTemplate target = (WinTemplate)obj;
             return target.ModuleID == this.ModuleID ? true : false;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 
@@ -115,11 +119,11 @@ public partial class WindowMgr : Singleton<WindowMgr>
                 root.transform.SetAsLastSibling();
                 root.SetActive(true);
                 template.RefCnt += 1;
-                LinkedListNode<WinTemplate> node = m_llWinTemplate.Find(template);
-                m_llWinTemplate.Remove(node);
-                m_llWinTemplate.AddFirst(template);
+                //LinkedListNode<WinTemplate> node = m_llWinTemplate.Find(template);
+                //m_llWinTemplate.Remove(node);
+                //m_llWinTemplate.AddFirst(template);
                 m_dictInstanceMapper.Add(instanceId, tmpIns);
-                m_dictTemplateMapper[moduleId] = template;
+                //m_dictTemplateMapper[moduleId] = template;
 #if !_DEBUG
                 try
                 {
@@ -188,10 +192,12 @@ public partial class WindowMgr : Singleton<WindowMgr>
                 }
             }
 
-            WinTemplate template;
-            template.ModuleID = interParam.ModuleID;
-            template.RefCnt = 1;
-            template.Template = res;
+            WinTemplate template = new WinTemplate()
+            {
+                ModuleID = interParam.ModuleID,
+                RefCnt = 1,
+                Template = res
+            };
             m_llWinTemplate.AddFirst(template);
             m_dictTemplateMapper.Add(template.ModuleID, template);
         }
@@ -251,7 +257,7 @@ public partial class WindowMgr : Singleton<WindowMgr>
                 if (m_dictTemplateMapper.TryGetValue(instance.GetModuleID(), out template))
                 {
                     template.RefCnt -= 1;
-                    m_dictTemplateMapper[instance.GetModuleID()] = template;
+                    //m_dictTemplateMapper[instance.GetModuleID()] = template;
                 }
                 GameObject.Destroy(instance.GetRoot());
                 m_hsUsedInsID.Remove(instance.GetWinInstanceID());

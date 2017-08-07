@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class SceneDataHolder : MonoBase
 {
-    [SerializeField] public List<ObstacleData> _ObstacleDataList;
+    [SerializeField] public List<StaticObstacleData> _ObstacleDataList;
     [SerializeField] public List<DynamicObstacleData> _DynamicObstacleList;
 }

@@ -9,7 +9,7 @@ namespace Battle.Projectiles
     {
         public float TimeNode;
         public float RemainDamage;
-        public ObstacleData Obstacle;
+        public StaticObstacleData Obstacle;
         public Vector3 TriggerPoint;
         public bool Triggred;
         public BattleDef.PROJECTILE_HITTYPE HitType;
@@ -73,7 +73,7 @@ namespace Battle.Projectiles
         }
 
         public void AddNode(float timeNode, float remainDamage,
-            ObstacleData obstacle, Vector3 triggerPoint, BattleDef.PROJECTILE_HITTYPE hitType)
+            StaticObstacleData obstacle, Vector3 triggerPoint, BattleDef.PROJECTILE_HITTYPE hitType)
         {
             if (_NodeIdx >= _Nodes.Count)
             {
