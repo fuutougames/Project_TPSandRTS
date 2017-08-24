@@ -16,7 +16,7 @@ public class ProjectileTestEditor : Editor {
         {
             ((ProjectileTest)target).RegisterObjects();
         }
-        if (GUILayout.Button("Register Characters"))
+        if (GUILayout.Button("Register Pawns"))
         {
             ((ProjectileTest)target).RegisterCharacters();
         }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using Rendering;
+//using Rendering;
 using Common;
 using UnityEngine.SceneManagement;
 
@@ -13,18 +13,27 @@ public partial class WindowMgr
     private GameObject m_objWindowRoot;
 
     private RectTransform m_transRootCanvas;
+    public RectTransform RootCanvasTrans { get { return m_transRootCanvas; } }
     private RectTransform m_transWindowRoot;
+    public RectTransform WindowRootTrans { get { return m_transWindowRoot; } }
 
     private Camera m_camUICam;
+    public Camera UICam { get { return m_camUICam; } }
 
     private Canvas m_compRootCanvas;
+    public Canvas RootCanvas { get { return m_compRootCanvas; } }
     private CanvasScaler m_compRootCanvasScaler;
+    public CanvasScaler RootCanvasScaler { get { return m_compRootCanvasScaler; } }
     private GraphicRaycaster m_compRootGraphicRaycaster;
+    public GraphicRaycaster RootGraphicRaycaster { get { return m_compRootGraphicRaycaster; } }
 
     private EventSystem m_compEventSystem;
+    public EventSystem EventSystem { get { return m_compEventSystem; } }
     private StandaloneInputModule m_compSIModule;
+    public StandaloneInputModule InputModule { get { return m_compSIModule; } }
 
     private Ticker m_compTicker;
+    public Ticker UITicker { get { return m_compTicker; } }
 
     public void Init()
     {
@@ -56,8 +65,8 @@ public partial class WindowMgr
 
         m_compTicker = m_objRootCanvas.GetComponent<Ticker>();
 
-        RenderingUnit unit = new RenderingUnit("UINode", m_camUICam);
-        RenderingMgr.Instance.AddCrucialUnitAtLast("UINode", unit);
+        //RenderingUnit unit = new RenderingUnit("UINode", m_camUICam);
+        //RenderingMgr.Instance.AddCrucialUnitAtLast("UINode", unit);
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)

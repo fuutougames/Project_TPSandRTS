@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using UnityEngine.UI;
 
 public partial class WindowMgr
 {
@@ -33,22 +29,6 @@ public partial class WindowMgr
         m_dictCurrentInsIdTail[moduleId] = instanceIdTail + 1;
         m_hsUsedInsID.Add(instanceId);
         return instanceId;
-    }
-
-    public Camera UICamera
-    {
-        get
-        {
-            return m_camUICam;
-        }
-    }
-
-    public Canvas RootCanvas
-    {
-        get
-        {
-            return m_compRootCanvas;
-        }
     }
 }
 

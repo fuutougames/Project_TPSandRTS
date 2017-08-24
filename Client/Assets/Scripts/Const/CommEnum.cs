@@ -1,4 +1,4 @@
-﻿namespace Data.Const
+﻿namespace Common
 {
     public static class CommEnum
     {
@@ -32,7 +32,7 @@
             SINPER_RIFLE = 5
         }
 
-        public enum CHARACTER_ATTRIBS
+        public enum PAWN_ATTRIBS
         {
             //基础属性
             //耐力
@@ -53,6 +53,12 @@
             ENDURANCE = 1004,
             //狡诈
             CUNNING = 1005,
+        }
+
+        public enum NETWORK_TYPE
+        {
+            HOST = 1,
+            CLIENT = 2,
         }
     }
 }

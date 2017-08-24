@@ -4,13 +4,11 @@ using UnityEngine.Networking;
 
 namespace Battle.Data
 {
-    public class CharacterBattleData : NetworkBase
+    [RequireComponent(typeof(PawnRuntimeData))]
+    public class Pawn : NetworkBase
     {
-        #region Sync Vars
-        [SyncVar(hook = "OnHPChanged")] private float _SyncHP;
-        [SyncVar(hook = "OnPlayerLiveStateChanged")] private bool _SyncIsDead;
-        #endregion
-
+        private PawnPreloadData _PreloadData;
+        private PawnRuntimeData _RuntimeData;
         private CapsuleCollider _CCollider;
 
         public CapsuleCollider CCollider
@@ -23,25 +21,7 @@ namespace Battle.Data
             }
         }
 
-        [Client]
-        private void OnHPChanged(float hp)
-        {
-            _SyncHP = hp;
-            // send info maybe?
-        }
-
-        [Client]
-        private void OnPlayerLiveStateChanged(bool isDead)
-        {
-            if (!_SyncIsDead || isDead)
-            {
-#if _DEBUG
-                Debug.Log("Player " + GetInstanceID() + " is Dead!!!");
-#endif
-            }
-            _SyncIsDead = isDead;
-        }
-        
+        [Server]
         public void TakeDamage(float dmg, BattleDef.DAMAGE_TYPE dmgType)
         {
 #if _DEBUG
@@ -50,13 +30,13 @@ namespace Battle.Data
             if (!isServer)
                 return;
 
-            float hp = _SyncHP - dmg;
+            float hp = _RuntimeData.HP - dmg;
             if (hp < 0)
             {
                 hp = 0;
-                _SyncIsDead = true;
+                //_SyncIsDead = true;
             }
-            _SyncHP = hp;
+            _RuntimeData.HP = hp;
         }
 
 

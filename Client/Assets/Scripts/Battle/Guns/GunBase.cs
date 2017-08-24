@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Battle.Data;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Battle.Guns
 {
@@ -39,6 +39,9 @@ namespace Battle.Guns
         public int CurrentRounds { get; private set; }
         public int TotalRounds { get; private set; }
 
+        /// <summary>
+        /// server only value, not valid in client
+        /// </summary>
         public bool _IsFiring;
 
 
@@ -59,6 +62,7 @@ namespace Battle.Guns
         /// <summary>
         /// single shot
         /// </summary>
+        [Server]
         public void Fire()
         {
             //base.Fire();
@@ -82,6 +86,17 @@ namespace Battle.Guns
             projectile.Init(_PBData);
             // calculate it with angle instead of xy offset;
             projectile.TriggerProjectile(MuzzleTrans.position, direction);
+            OnFire();
+
+            RpcFireOnClient(MuzzleTrans.position, direction);
+        }
+        
+        [ClientRpc]
+        private void RpcFireOnClient(Vector3 firePos, Vector3 fireDir)
+        {
+            ProjectileBase projectile = CreateProjectile();
+            projectile.Init(_PBData);
+            projectile.TriggerProjectile(firePos, fireDir);
             OnFire();
         }
 
@@ -107,7 +122,7 @@ namespace Battle.Guns
 
         void FixedUpdate()
         {
-            if (_IsFiring)
+            if (_IsFiring && isServer)
             {
                 Fire();
             }

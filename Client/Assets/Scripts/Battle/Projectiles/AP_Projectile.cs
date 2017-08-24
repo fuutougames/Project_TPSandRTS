@@ -10,12 +10,12 @@ namespace Battle.Projectiles
             return base.CalcDmgLost(obstacle, penLen);
         }
 
-        public override float CalculateDamage(CharacterHitData hitData, float remainDmg)
+        public override float CalculateDamage(PawnHitData hitData, float remainDmg)
         {
             return base.CalculateDamage(hitData, remainDmg);
         }
 
-        public override bool ProcessHitData(List<CharacterHitData> hitData, out int hitCnt)
+        public override bool ProcessHitData(List<PawnHitData> hitData, out int hitCnt)
         {
             hitCnt = 0;
             float dmgLost = 0;
@@ -36,7 +36,7 @@ namespace Battle.Projectiles
                 dmgLost += damage;
 
                 //if (isServer)
-                hitData[i].Character.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
+                hitData[i].APawn.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
 
                 if (remainDmg <= 0)
                 {

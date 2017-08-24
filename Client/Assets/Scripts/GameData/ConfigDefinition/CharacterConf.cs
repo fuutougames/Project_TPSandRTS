@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Data.Const;
+using Common;
+
 
 namespace Data.Config
 {
     [System.Serializable]
-    public class RangeDict : SerializableDictionaryBase<CommEnum.CHARACTER_ATTRIBS, Vector2> { };
+    public class RangeDict : SerializableDictionaryBase<CommEnum.PAWN_ATTRIBS, Vector2> { };
     [CreateAssetMenu(fileName = "CharacterConf", menuName = "Config/CharacterConf", order = 1)]
     public class CharacterConf : ScriptableObject
     {
@@ -20,3 +21,4 @@ namespace Data.Config
         public RangeDict UpperBoundRndRange;
     }
 }
+

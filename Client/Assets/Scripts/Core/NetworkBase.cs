@@ -17,6 +17,17 @@ public class NetworkBase : NetworkBehaviour
         }
     }
 
+    private NetworkIdentity _Identity;
+    public NetworkIdentity Identity
+    {
+        get
+        {
+            if (_Identity == null)
+                _Identity = GetComponent<NetworkIdentity>();
+            return _Identity;
+        }
+    }
+
     protected virtual void OnAwake() { }
     protected virtual void OnStart() { }
     protected virtual void OnUpdate() { }

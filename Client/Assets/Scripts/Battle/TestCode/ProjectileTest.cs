@@ -71,10 +71,10 @@ public class ProjectileTest : MonoBehaviour {
     public void RegisterCharacters()
     {
         GameObject characterRoot = GameObject.Find("PlayerRoot");
-        CharacterBattleData[] characters = characterRoot.transform.GetComponentsInChildren<CharacterBattleData>(true);
+        Pawn[] characters = characterRoot.transform.GetComponentsInChildren<Pawn>(true);
         for (int i = 0; i < characters.Length; ++i)
         {
-            BattleMgr.Instance.BData.RegisterCharacter(characters[i]);
+            BattleMgr.Instance.BData.RegisterPawn(characters[i]);
         }
     }
 }

@@ -5,7 +5,7 @@ public abstract class MonoSingleton : MonoBase { }
 
 public abstract class MonoSingleton<T> : MonoSingleton where T : MonoSingleton
 {
-    private static bool Compare<T>(T x, T y) where T : class
+    private static bool Compare<T1>(T1 x, T1 y) where T1 : class
     {
         return x == y;
     }

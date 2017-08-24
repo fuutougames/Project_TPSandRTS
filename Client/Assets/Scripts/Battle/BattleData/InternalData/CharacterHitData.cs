@@ -3,16 +3,16 @@
 namespace Battle
 {
     using Data;
-    public class CharacterHitData
+    public class PawnHitData
     {
-        public CharacterBattleData Character;
+        public Pawn APawn;
         public Vector3[] HitPoints;
         public float PenetrationLen;
         public BattleDef.PROJECTILE_HITTYPE HitType;
         public float HitDistance;
 
 
-        public static int SortByHitDistance(CharacterHitData item1, CharacterHitData item2)
+        public static int SortByHitDistance(PawnHitData item1, PawnHitData item2)
         {
             if (item1.HitDistance < item2.HitDistance)
                 return -1;

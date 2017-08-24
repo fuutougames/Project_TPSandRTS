@@ -43,7 +43,7 @@ namespace Battle.Projectiles
         }
 
         private float _StartTime;
-        private float _EndTime;
+        //private float _EndTime;
         private float _TimeClipLen;
         private List<ProjectileDmgLineNode> _Nodes;
 
@@ -68,7 +68,7 @@ namespace Battle.Projectiles
         public void SetStartAndEndTime(float start, float end)
         {
             _StartTime = start;
-            _EndTime = end;
+            //_EndTime = end;
             _TimeClipLen = end - start;
         }
 

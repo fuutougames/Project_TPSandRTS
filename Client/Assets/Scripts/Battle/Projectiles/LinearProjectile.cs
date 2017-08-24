@@ -342,7 +342,7 @@ namespace Battle.Projectiles
             return BattleDef.PROJECTILE_HITTYPE.PENETRATE;
         }
 
-        public override BattleDef.PROJECTILE_HITTYPE IsCollideWithCharacter(float time, CharacterBattleData cbData,
+        public override BattleDef.PROJECTILE_HITTYPE IsCollideWithPawn(float time, Pawn cbData,
             out Vector3[] hitPoints, out float penLen)
         {
             //base.IsCollideWithCharacter(time, cbData, out hitPoints);

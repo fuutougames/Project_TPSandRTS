@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
+using Common;
 
 namespace Data.DataIns
 {
-    using Data.Const;
-    public class CharacterAttribDictionary : SerializableDictionaryBase<CommEnum.CHARACTER_ATTRIBS, float> {};
+    public class CharacterAttribDictionary : SerializableDictionaryBase<CommEnum.PAWN_ATTRIBS, float> {};
     public class CharacterExpDictionary : SerializableDictionaryBase<CommEnum.GUN_TYPE, float> { };
-    public class CharacterData
+    public class PawnData
     {
         /// <summary>
         /// 角色基础属性数据
@@ -22,7 +20,7 @@ namespace Data.DataIns
         /// <summary>
         /// construct function
         /// </summary>
-        public CharacterData()
+        public PawnData()
         {
 
         }
@@ -31,7 +29,7 @@ namespace Data.DataIns
         /// class copy function
         /// </summary>
         /// <param name="data"></param>
-        public CharacterData(CharacterData data)
+        public PawnData(PawnData data)
         {
 
         }

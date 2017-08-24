@@ -119,12 +119,14 @@ namespace Battle.Projectiles
 
         #region Collide Judge interfaces
         /// <summary>
-        /// Client will need this function too
+        /// 
         /// </summary>
         /// <param name="time"></param>
-        /// <param name="characterCollider"></param>
-        /// <returns>Hit Point</returns>
-        public virtual BattleDef.PROJECTILE_HITTYPE IsCollideWithCharacter(float time, CharacterBattleData cBData,
+        /// <param name="cBData"></param>
+        /// <param name="hitPoints"></param>
+        /// <param name="penLen"></param>
+        /// <returns></returns>
+        public virtual BattleDef.PROJECTILE_HITTYPE IsCollideWithPawn(float time, Pawn cBData,
             out Vector3[] hitPoints, out float penLen)
         {
             hitPoints = null;
@@ -140,7 +142,7 @@ namespace Battle.Projectiles
         #endregion
 
 
-        public virtual float CalculateDamage(CharacterHitData hitData, float remaniDmg)
+        public virtual float CalculateDamage(PawnHitData hitData, float remaniDmg)
         {
             return 0;
         }
@@ -151,7 +153,7 @@ namespace Battle.Projectiles
         /// <param name="hitData">hit data list</param>
         /// <param name="hitCnt">return how many character hit data is actually valid</param>
         /// <returns>is projectile life end, true end, false not end</returns>
-        public virtual bool ProcessHitData(List<CharacterHitData> hitData, out int hitCnt)
+        public virtual bool ProcessHitData(List<PawnHitData> hitData, out int hitCnt)
         {
             hitCnt = 0;
             return false;

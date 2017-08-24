@@ -9,7 +9,7 @@ namespace Battle
     public class BattleData
     {
         public BattleDef.BATTLE_TYPE BType;
-        private Dictionary<int, CharacterBattleData> _CharacterList;
+        private Dictionary<int, Pawn> _PawnList;
         private Dictionary<int, ProjectileBase> _ActiveProjectiles;
         private List<TrapBase> _ActiveTraps;
 
@@ -17,15 +17,15 @@ namespace Battle
         public void Reset(BattleDef.BATTLE_TYPE btype = BattleDef.BATTLE_TYPE.TYPE_1)
         {
             BType = btype;
-            _CharacterList = new Dictionary<int, CharacterBattleData>();
+            _PawnList = new Dictionary<int, Pawn>();
             _ActiveProjectiles = new Dictionary<int, ProjectileBase>();
             _ActiveTraps = new List<TrapBase>();
         }
         #endregion
 
         #region Projectiles
-        private readonly List<CharacterHitData> _HitedCharacterList = new List<CharacterHitData>();
-        private int _HitedCharacterCnt = 0;
+        private readonly List<PawnHitData> _HitedPawnList = new List<PawnHitData>();
+        private int _HitedPawnCnt = 0;
         private bool _UpdatingProjectiles = false;
         private readonly List<ProjectileBase> _RegisterBuffer = new List<ProjectileBase>();
         private readonly List<ProjectileBase> _UnRegisterBuffer = new List<ProjectileBase>(); 
@@ -40,17 +40,17 @@ namespace Battle
                 if (iter.Current.Value.Disposed)
                     continue;
 
-                _HitedCharacterCnt = 0;
+                _HitedPawnCnt = 0;
                 ProjectileBase projectile = iter.Current.Value;
                 //bool collideOccur = false;
-                Dictionary<int, CharacterBattleData>.Enumerator cIter = _CharacterList.GetEnumerator();
+                Dictionary<int, Pawn>.Enumerator cIter = _PawnList.GetEnumerator();
                 while(cIter.MoveNext())
                 { 
                     Vector3[] hitPoints;
                     float penLen;
                     // if hit character
                     BattleDef.PROJECTILE_HITTYPE hitType =
-                        projectile.IsCollideWithCharacter(TimeMgr.Instance.GetCurrentTime(), cIter.Current.Value,
+                        projectile.IsCollideWithPawn(TimeMgr.Instance.GetCurrentTime(), cIter.Current.Value,
                             out hitPoints, out penLen);
 
                     // hit data calculation
@@ -58,17 +58,17 @@ namespace Battle
                     if (hitType != BattleDef.PROJECTILE_HITTYPE.NONE)
                     {
                         //collideOccur = true;
-                        CharacterHitData cHitData;
-                        if (_HitedCharacterCnt >= _HitedCharacterList.Count)
+                        PawnHitData cHitData;
+                        if (_HitedPawnCnt >= _HitedPawnList.Count)
                         {
-                            cHitData = new CharacterHitData();
-                            _HitedCharacterList.Add(cHitData);
+                            cHitData = new PawnHitData();
+                            _HitedPawnList.Add(cHitData);
                         }
                         else
                         {
-                            cHitData = _HitedCharacterList[_HitedCharacterCnt];
+                            cHitData = _HitedPawnList[_HitedPawnCnt];
                         }
-                        cHitData.Character = cIter.Current.Value;
+                        cHitData.APawn = cIter.Current.Value;
                         cHitData.PenetrationLen = penLen;
                         cHitData.HitPoints = hitPoints;
                         cHitData.HitType = hitType;
@@ -77,7 +77,7 @@ namespace Battle
                             cHitData.HitDistance = (hitPoints[0] - projectile.StartPos).magnitude;
                         }
 
-                        ++_HitedCharacterCnt;
+                        ++_HitedPawnCnt;
                     }
 
                     // TODO: if hit dynamic obstacles
@@ -85,36 +85,36 @@ namespace Battle
                 }
 
                 // move the useless hit data away
-                if (_HitedCharacterCnt < _HitedCharacterList.Count)
+                if (_HitedPawnCnt < _HitedPawnList.Count)
                 {
-                    for (int i = _HitedCharacterCnt; i < _HitedCharacterList.Count; ++i)
+                    for (int i = _HitedPawnCnt; i < _HitedPawnList.Count; ++i)
                     {
-                        _HitedCharacterList[i].HitDistance = float.MaxValue;
+                        _HitedPawnList[i].HitDistance = float.MaxValue;
                     }
                 }
 
                 // TODO: sort the hit data list by hit distance
-                _HitedCharacterList.Sort(CharacterHitData.SortByHitDistance);
+                _HitedPawnList.Sort(PawnHitData.SortByHitDistance);
 
                 int hitCnt;
                 // process hit data
                 // TODO: implement process function for every projectile
-                projectile.ProcessHitData(_HitedCharacterList, out hitCnt);
+                projectile.ProcessHitData(_HitedPawnList, out hitCnt);
 
                 // display hit effect
                 for (int i = 0; i < hitCnt; ++i)
                 {
-                    CharacterHitData data = _HitedCharacterList[i];
+                    PawnHitData data = _HitedPawnList[i];
                     if (data.HitType == BattleDef.PROJECTILE_HITTYPE.PENETRATE)
                     {
-                        data.Character.OnProjectileCollide(projectile, data.HitPoints[0], BattleDef.PROJECTILE_HITTYPE.IN, 
+                        data.APawn.OnProjectileCollide(projectile, data.HitPoints[0], BattleDef.PROJECTILE_HITTYPE.IN, 
                             projectile.ProjectileType);
-                        data.Character.OnProjectileCollide(projectile, data.HitPoints[1], BattleDef.PROJECTILE_HITTYPE.OUT,
+                        data.APawn.OnProjectileCollide(projectile, data.HitPoints[1], BattleDef.PROJECTILE_HITTYPE.OUT,
                             projectile.ProjectileType);
                     }
                     else
                     {
-                        data.Character.OnProjectileCollide(projectile, data.HitPoints[0], data.HitType,
+                        data.APawn.OnProjectileCollide(projectile, data.HitPoints[0], data.HitType,
                             projectile.ProjectileType);
                     }
                 }
@@ -172,18 +172,18 @@ namespace Battle
 
 
 
-        #region Characters
-        public void RegisterCharacter(CharacterBattleData cbData)
+        #region Pawns
+        public void RegisterPawn(Pawn cbData)
         {
-            if (_CharacterList.ContainsKey(cbData.GetInstanceID()))
+            if (_PawnList.ContainsKey(cbData.GetInstanceID()))
                 return;
 
-            _CharacterList.Add(cbData.GetInstanceID(), cbData);
+            _PawnList.Add(cbData.GetInstanceID(), cbData);
         }
 
-        public void UnRegisterCharacter(int instanceId)
+        public void UnRegisterPawn(int instanceId)
         {
-            _CharacterList.Remove(instanceId);
+            _PawnList.Remove(instanceId);
         }
         #endregion
     }

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Data.Const;
+using Common;
 
 namespace Data.Config
 {
