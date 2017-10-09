@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 using Common;
 
 public class WindowBase : IWindow
@@ -19,11 +14,19 @@ public class WindowBase : IWindow
 
     }
 
+    /// <summary>
+    /// Get window module id
+    /// </summary>
+    /// <returns></returns>
     public int GetModuleID()
     {
         return m_wiInfo.ModuleID;
     }
 
+    /// <summary>
+    /// Get window instance id
+    /// </summary>
+    /// <returns></returns>
     public int GetWinInstanceID()
     {
         return m_iInstanceID;
@@ -48,16 +51,26 @@ public class WindowBase : IWindow
         m_ticker = m_objInstanceRoot.AddComponent<Ticker>();
     }
 
+    /// <summary>
+    /// Being called when window prefab is loaded
+    /// </summary>
     public virtual void Init()
     {
 
     }
 
-    public virtual void StartUp(object param = null)
+    /// <summary>
+    /// Being called when window open, always call after startlistener
+    /// </summary>
+    /// <param name="paramArr"></param>
+    public virtual void StartUp(params object[] paramArr)
     {
 
     }
 
+    /// <summary>
+    /// Being called when window open, always call after init
+    /// </summary>
     public virtual void StartListener()
     {
 
@@ -75,6 +88,6 @@ public class WindowBase : IWindow
 
     protected void Close()
     {
-        Dispatcher.Dispatch<int>(GameEvents.WindowCloseEvent.EVT_NAME, m_iInstanceID);
+        Dispatcher.Dispatch(GameEvents.CommEvt.WINDOW_CLOSE_EVENT, m_iInstanceID);
     }
 }

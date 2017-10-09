@@ -19,6 +19,11 @@ public class Login : WindowBase {
         UGUIEvtHandler.AddListener(m_objBTNExit, UGUIEvtType.POINTER_CLICK, OnExit);
     }
 
+    public override void StartUp(params object[] paramArr)
+    {
+        base.StartUp(paramArr);
+    }
+
     private void OnLoginClick(PointerEventData evtDat)
     {
         Debug.Log(m_ifAcc.text);

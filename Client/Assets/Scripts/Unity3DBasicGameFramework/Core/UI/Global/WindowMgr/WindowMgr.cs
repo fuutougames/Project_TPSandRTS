@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using Common;
 using GameEvents;
 using UnityEngine;
@@ -49,18 +46,32 @@ public partial class WindowMgr : Singleton<WindowMgr>
 
     public WindowMgr()
     {
-        Dispatcher.AddListener<WindowStartUpEvent>(WindowStartUpEvent.EVT_NAME, OnWindowOpen);
-        Dispatcher.AddListener<int>(WindowStartUpEvent.EVT_NAME, OnWindowOpen);
-        Dispatcher.AddListener<int>(WindowCloseEvent.EVT_NAME, OnWindowClose);
+        Dispatcher.RegisterHandler(GameEvents.CommEvt.WINDOW_OPEN_EVENT, OnWindowOpen);
+        //Dispatcher.RegisterHandler(WindowStartUpEvent.EVT_NAME, OnWindowOpen);
+        Dispatcher.RegisterHandler(GameEvents.CommEvt.WINDOW_CLOSE_EVENT, OnWindowClose);
     }
 
-    private void OnWindowOpen(int moduleId)
+    private void OnWindowOpen(params object [] paramArr)
     {
+        int moduleId = (int)paramArr[0];
         WindowStartUpEvent evt = new WindowStartUpEvent();
         evt.ModuleID = moduleId;
+        evt.Params = null;
+        if (paramArr.Length >= 2)
+        {
+            List<object> subParamArr = new List<object>();
+            for (int i = 1; i < paramArr.Length; ++i)
+            {
+                subParamArr.Add(paramArr[i]);
+            }
+
+            evt.Params = subParamArr.ToArray();
+        }
+
         OnWindowOpen(evt);
     }
 
+    //private void OnWindowOpen(int moduleId, params object[] paramArr)
     private void OnWindowOpen(WindowStartUpEvent param)
     {
         if (m_bIsOpeningAWindow)
@@ -227,8 +238,9 @@ public partial class WindowMgr : Singleton<WindowMgr>
         m_bIsOpeningAWindow = false;
     }
 
-    private void OnWindowClose(int instanceId)
+    private void OnWindowClose(params object [] paramArr)
     {
+        int instanceId = (int)paramArr[0];
         IWindow instance;
         if (m_dictInstanceMapper.TryGetValue(instanceId, out instance))
         {

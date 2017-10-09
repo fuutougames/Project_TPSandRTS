@@ -12,7 +12,7 @@ public interface IWindow
     GameObject GetRoot();
     void BaseInit(int moduleId, int instanceId, GameObject root);
     void Init();
-    void StartUp(object param = null);
+    void StartUp(params object[] paramArr);
     void StartListener();
     void RemoveListener();
     void Clear();
