@@ -3,16 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Dispatcher : Singleton<Dispatcher>
+public static class Dispatcher
 {
     public delegate void EVT_HANDLER (params object[] paramArr);
 
     private static Dictionary<string, HashSet<EVT_HANDLER>> evtMap = new Dictionary<string, HashSet<EVT_HANDLER>>();
 
-    public Dispatcher()
-    {
+    //public Dispatcher()
+    //{
         //evtMap = new Dictionary<string, HashSet<EVT_HANDLER>>();
-    }
+    //}
 
     public static void RegisterHandler(string evt, EVT_HANDLER handler)
     {

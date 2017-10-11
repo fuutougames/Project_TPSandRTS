@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Common;
 using GameEvents;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public partial class WindowMgr : Singleton<WindowMgr>
 {
@@ -41,20 +45,47 @@ public partial class WindowMgr : Singleton<WindowMgr>
     private LinkedList<WinTemplate> m_llWinTemplate = new LinkedList<WinTemplate>();
 
     private bool m_bIsOpeningAWindow = false;
-    private Queue<WindowStartUpEvent> m_qOpenQueue = new Queue<WindowStartUpEvent>();
+    private Queue<WinStartUpData> m_qOpenQueue = new Queue<WinStartUpData>();
 
 
     public WindowMgr()
     {
         Dispatcher.RegisterHandler(GameEvents.CommEvt.WINDOW_OPEN_EVENT, OnWindowOpen);
-        //Dispatcher.RegisterHandler(WindowStartUpEvent.EVT_NAME, OnWindowOpen);
         Dispatcher.RegisterHandler(GameEvents.CommEvt.WINDOW_CLOSE_EVENT, OnWindowClose);
+    }
+
+
+    private Dictionary<int, int> m_dictCurrentInsIdTail = new Dictionary<int, int>();
+    public int GenerateInstanceID(int moduleId)
+    {
+        int instanceIdTail;
+        if (!m_dictCurrentInsIdTail.TryGetValue(moduleId, out instanceIdTail))
+        {
+            m_dictCurrentInsIdTail[moduleId] = 0;
+            instanceIdTail = 0;
+        }
+        int instanceId = moduleId * 100 + (instanceIdTail % 100);
+        for (int i = 0; i < 100 && m_hsUsedInsID.Contains(instanceId); ++i)
+        {
+            instanceIdTail += 1;
+            instanceId = moduleId * 100 + (instanceIdTail % 100);
+            if (i == 99)
+            {
+                if (m_hsUsedInsID.Contains(instanceId))
+                {
+                    throw new Exception(string.Format("Too Much Window Instance of Module-{0}", moduleId));
+                }
+            }
+        }
+        m_dictCurrentInsIdTail[moduleId] = instanceIdTail + 1;
+        m_hsUsedInsID.Add(instanceId);
+        return instanceId;
     }
 
     private void OnWindowOpen(params object [] paramArr)
     {
         int moduleId = (int)paramArr[0];
-        WindowStartUpEvent evt = new WindowStartUpEvent();
+        WinStartUpData evt = new WinStartUpData();
         evt.ModuleID = moduleId;
         evt.Params = null;
         if (paramArr.Length >= 2)
@@ -71,9 +102,14 @@ public partial class WindowMgr : Singleton<WindowMgr>
         OnWindowOpen(evt);
     }
 
-    //private void OnWindowOpen(int moduleId, params object[] paramArr)
-    private void OnWindowOpen(WindowStartUpEvent param)
+    private void OnWindowOpen(WinStartUpData param)
     {
+        if (!m_UISceneLoaded)
+        {
+            m_qOpenQueue.Enqueue(param);
+            return;
+        }
+
         if (m_bIsOpeningAWindow)
         {
             // another window is loading, put this one into open queue and return;
@@ -86,7 +122,7 @@ public partial class WindowMgr : Singleton<WindowMgr>
         int instanceId = moduleId;
         IWindow tmpIns;
         // if key moduleId exist in m_dictInstanceMapper,
-        // shows that this window is a uniqe window,
+        // shows that this window is a unique window,
         // and it's in the cache;
         if (m_dictInstanceMapper.TryGetValue(instanceId, out tmpIns))
         {
@@ -98,9 +134,9 @@ public partial class WindowMgr : Singleton<WindowMgr>
             try
             {
 #endif
-                tmpIns.GetRoot().SetActive(true);
                 tmpIns.GetRoot().transform.SetAsLastSibling();
-                tmpIns.StartListener();
+                tmpIns.GetRoot().SetActive(true);
+                tmpIns.RegisterListeners();
                 tmpIns.StartUp(param.Params);
 #if !_DEBUG
             }
@@ -113,7 +149,7 @@ public partial class WindowMgr : Singleton<WindowMgr>
             return;
         }
 
-        // not in the cache, but it's not a uniqe window
+        // not in the cache, but it's not a unique window
         tmpIns = GetWinInstance(moduleId);
         //tmpIns.SetWindowInfo(moduleId);
         //if (!tmpIns.IsUniqeWindow())
@@ -122,7 +158,7 @@ public partial class WindowMgr : Singleton<WindowMgr>
             WinTemplate template;
             // resources is already loaded
             // create a new window immediately
-            instanceId = GetInstanceID(moduleId);
+            instanceId = GenerateInstanceID(moduleId);
             if (m_dictTemplateMapper.TryGetValue(moduleId, out template))
             {
                 GameObject root = GameObject.Instantiate(template.Template) as GameObject;
@@ -141,7 +177,7 @@ public partial class WindowMgr : Singleton<WindowMgr>
 #endif
                     tmpIns.BaseInit(moduleId, instanceId, root);
                     tmpIns.Init();
-                    tmpIns.StartListener();
+                    tmpIns.RegisterListeners();
                     tmpIns.StartUp(param.Params);
 #if !_DEBUG
                 }
@@ -226,7 +262,7 @@ public partial class WindowMgr : Singleton<WindowMgr>
 #endif
             instance.BaseInit(interParam.ModuleID, interParam.InstanceID, root);
             instance.Init();
-            instance.StartListener();
+            instance.RegisterListeners();
             instance.StartUp(interParam.StartParam);
 #if !_DEBUG
         }
@@ -248,7 +284,7 @@ public partial class WindowMgr : Singleton<WindowMgr>
             try
             {
 #endif
-                instance.RemoveListener();
+                instance.UnregisterListeners();
                 instance.Clear();
 #if !_DEBUG
             }
@@ -278,6 +314,7 @@ public partial class WindowMgr : Singleton<WindowMgr>
         }
     }
 
+    // driven by unity update event
     private void OnTryOpenBufferedWindow(float dt)
     {
         // DO NOT PUT THIS CODEBLOCK INTO OnWindowLoaded or OnWindowOpen
@@ -292,5 +329,79 @@ public partial class WindowMgr : Singleton<WindowMgr>
             }
         }
     }
+
+
+    #region Initialize
+    private GameObject m_objRootCanvas;
+    private GameObject m_objUICam;
+    private GameObject m_objEventSystem;
+    private GameObject m_objWindowRoot;
+
+    private RectTransform m_transRootCanvas;
+    public RectTransform RootCanvasTrans { get { return m_transRootCanvas; } }
+    private RectTransform m_transWindowRoot;
+    public RectTransform WindowRootTrans { get { return m_transWindowRoot; } }
+
+    private Camera m_camUICam;
+    public Camera UICam { get { return m_camUICam; } }
+
+    private Canvas m_compRootCanvas;
+    public Canvas RootCanvas { get { return m_compRootCanvas; } }
+    private CanvasScaler m_compRootCanvasScaler;
+    public CanvasScaler RootCanvasScaler { get { return m_compRootCanvasScaler; } }
+    private GraphicRaycaster m_compRootGraphicRaycaster;
+    public GraphicRaycaster RootGraphicRaycaster { get { return m_compRootGraphicRaycaster; } }
+
+    private EventSystem m_compEventSystem;
+    public EventSystem EventSystem { get { return m_compEventSystem; } }
+    private StandaloneInputModule m_compSIModule;
+    public StandaloneInputModule InputModule { get { return m_compSIModule; } }
+
+    private Ticker m_compTicker;
+    public Ticker UITicker { get { return m_compTicker; } }
+
+    private bool m_UISceneLoaded = false;
+
+    public void Init()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.LoadScene("UIScene", LoadSceneMode.Additive);
+    }
+
+    private void UISceneLoadedCallback(Scene scene, LoadSceneMode mode)
+    {
+        GameObject uiSceneRoot = GameObject.Find("UGUIRoot");
+        GameObject.DontDestroyOnLoad(uiSceneRoot);
+        Transform uiSceneRootTrans = uiSceneRoot.transform;
+        m_objRootCanvas = uiSceneRootTrans.Find("RootCanvas").gameObject;
+        m_objUICam = uiSceneRootTrans.Find("UICamera").gameObject;
+        m_objEventSystem = uiSceneRootTrans.Find("RootCanvas/EventSystem").gameObject;
+        m_objWindowRoot = uiSceneRootTrans.Find("RootCanvas/WindowRoot").gameObject;
+
+        m_transRootCanvas = m_objRootCanvas.GetComponent<RectTransform>();
+        m_transWindowRoot = m_objWindowRoot.GetComponent<RectTransform>();
+
+        m_camUICam = m_objUICam.GetComponent<Camera>();
+
+        m_compRootCanvas = m_objRootCanvas.GetComponent<Canvas>();
+        m_compRootCanvasScaler = m_objRootCanvas.GetComponent<CanvasScaler>();
+        m_compRootGraphicRaycaster = m_objRootCanvas.GetComponent<GraphicRaycaster>();
+
+        m_compEventSystem = m_objEventSystem.GetComponent<EventSystem>();
+        m_compSIModule = m_objEventSystem.GetComponent<StandaloneInputModule>();
+
+        m_compTicker = m_objRootCanvas.GetComponent<Ticker>();
+        m_compTicker.RegisterUpdateFunc(OnTryOpenBufferedWindow);
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "UIScene")
+        {
+            m_UISceneLoaded = true;
+            UISceneLoadedCallback(scene, mode);
+        }
+    }
+    #endregion
 }
 

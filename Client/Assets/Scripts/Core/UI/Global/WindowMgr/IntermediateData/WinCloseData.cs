@@ -5,7 +5,7 @@ using System.Text;
 
 namespace GameEvents
 {
-    public class WindowCloseEvent
+    public class WinCloseData
     {
         public static readonly string EVT_NAME = "WINDOW_CLOSE_EVENT";
 
