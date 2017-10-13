@@ -1,0 +1,28 @@
+/*
+ * AUTO GENERATED FILE, DO NOT MODIFY
+ */
+
+using System.Collections.Generic;
+
+namespace Network.Packets
+{
+    public class #PACKET_NAME# : IPacket
+    {
+#PACKET_ATTRIBS#
+
+        public short GetPacketID()
+        {
+#PACKET_GETID#
+        }
+
+        public void Read(ByteArray buffer)
+        {
+#PACKET_READ#
+        }
+
+        public void Write(ByteArray buffer)
+        {
+#PACKET_WRITE#
+        }
+    }
+}

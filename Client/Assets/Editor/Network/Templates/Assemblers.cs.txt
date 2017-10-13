@@ -1,0 +1,19 @@
+/*
+ * AUTO GENERATED FILE, DO NOT MODIFY
+ */
+
+using System.Collections;
+using System.Collections.Generic;
+
+namespace Network.Packets
+{
+    public static partial class PacketFactory
+    {
+        private static Dictionary<int, PACKET_ASSEMBLER> m_PacketAssemblerMap = new Dictionary<int, PACKET_ASSEMBLER>()
+        {
+#ASSEMBLER_MAP#
+        };
+#ASSEMBLERS#
+    }
+}
+

@@ -8,20 +8,24 @@ namespace Common
 {
     public class Ticker : MonoBase
     {
-        public delegate void ON_UPDATE(float dt);
-        public delegate void ON_LATE_UPDATE(float dt);
-        public delegate void ON_FIXED_UPDATE(float dt);
+        public delegate void UPDATE_FUNC(float dt);
 
-        //public ON_UPDATE onUpdate = null;
-        //public ON_LATE_UPDATE onLateUpdate = null;
-        //public ON_FIXED_UPDATE onFixedUpdate = null;
+        private HashSet<UPDATE_FUNC> updateFuncs = new HashSet<UPDATE_FUNC>(); 
+        private HashSet<UPDATE_FUNC> lateUpdateFuncs = new HashSet<UPDATE_FUNC>(); 
+        private HashSet<UPDATE_FUNC> fixedUpdateFuncs = new HashSet<UPDATE_FUNC>();
 
-        private HashSet<ON_UPDATE> updateFuncs = new HashSet<ON_UPDATE>(); 
-        private HashSet<ON_LATE_UPDATE> lateUpdateFuncs = new HashSet<ON_LATE_UPDATE>(); 
-        private HashSet<ON_FIXED_UPDATE> fixedUpdateFuncs = new HashSet<ON_FIXED_UPDATE>(); 
+        private HashSet<UPDATE_FUNC> m_updateAddBuffer = new HashSet<UPDATE_FUNC>();  
+        private HashSet<UPDATE_FUNC> m_lateupdateAddBuffer = new HashSet<UPDATE_FUNC>(); 
+        private HashSet<UPDATE_FUNC> m_fixedupdateAddBuffer = new HashSet<UPDATE_FUNC>(); 
 
-        public void RegisterUpdateFunc(ON_UPDATE func)
+        public void RegisterUpdateFunc(UPDATE_FUNC func)
         {
+            if (m_updating)
+            {
+                m_updateAddBuffer.Add(func);
+                return;
+            }
+
             if (updateFuncs.Contains(func))
             {
 #if UNITY_EDITOR
@@ -33,8 +37,14 @@ namespace Common
             updateFuncs.Add(func);
         }
 
-        public void RegisterLateUpdateFunc(ON_LATE_UPDATE func)
+        public void RegisterLateUpdateFunc(UPDATE_FUNC func)
         {
+            if (m_lateupdating)
+            {
+                m_lateupdateAddBuffer.Add(func);
+                return;
+            }
+
             if (lateUpdateFuncs.Contains(func))
             {
 #if UNITY_EDITOR
@@ -46,8 +56,14 @@ namespace Common
             lateUpdateFuncs.Add(func);
         }
 
-        public void RegisterFixedUpdateFunc(ON_FIXED_UPDATE func)
+        public void RegisterFixedUpdateFunc(UPDATE_FUNC func)
         {
+            if (m_fixedupdating)
+            {
+                m_fixedupdateAddBuffer.Add(func);
+                return;
+            }
+
             if (fixedUpdateFuncs.Contains(func))
             {
 #if UNITY_EDITOR
@@ -59,25 +75,30 @@ namespace Common
             fixedUpdateFuncs.Add(func);
         }
 
-        public void UnregisterUpdateFunc(ON_UPDATE func)
+        public void UnregisterUpdateFunc(UPDATE_FUNC func)
         {
             updateFuncs.Remove(func);
+            m_updateAddBuffer.Remove(func);
         }
 
-        public void UnregisterLateUpdateFunc(ON_LATE_UPDATE func)
+        public void UnregisterLateUpdateFunc(UPDATE_FUNC func)
         {
             lateUpdateFuncs.Remove(func);
+            m_lateupdateAddBuffer.Remove(func);
         }
 
-        public void UnregisterFixedUpdateFunc(ON_FIXED_UPDATE func)
+        public void UnregisterFixedUpdateFunc(UPDATE_FUNC func)
         {
             fixedUpdateFuncs.Remove(func);
+            m_fixedupdateAddBuffer.Remove(func);
         }
 
+        private bool m_updating = false;
         protected override void OnUpdate()
         {
             base.OnUpdate();
-            HashSet<ON_UPDATE>.Enumerator iter = updateFuncs.GetEnumerator();
+            m_updating = true;
+            HashSet<UPDATE_FUNC>.Enumerator iter = updateFuncs.GetEnumerator();
             while (iter.MoveNext())
             {
                 try
@@ -93,48 +114,91 @@ namespace Common
 #endif
                 }
             }
+            m_updating = false;
+
+            if (m_updateAddBuffer.Count == 0)
+                return;
+
+            iter = m_updateAddBuffer.GetEnumerator();
+            while (iter.MoveNext())
+            {
+                RegisterUpdateFunc(iter.Current);
+            }
+            m_updateAddBuffer.Clear();
         }
 
 
+        private bool m_lateupdating = false;
         protected override void OnLateUpdate()
         {
             base.OnLateUpdate();
-            HashSet<ON_LATE_UPDATE>.Enumerator iter = lateUpdateFuncs.GetEnumerator();
-            while (iter.MoveNext())
+            if (lateUpdateFuncs.Count > 0)
             {
-                try
+                m_lateupdating = true;
+                HashSet<UPDATE_FUNC>.Enumerator iter = lateUpdateFuncs.GetEnumerator();
+                while (iter.MoveNext())
                 {
-                    iter.Current.Invoke(Time.deltaTime);
-                }
-                catch (Exception e)
-                {
+                    try
+                    {
+                        iter.Current.Invoke(Time.deltaTime);
+                    }
+                    catch (Exception e)
+                    {
 #if UNITY_EDITOR
-                    Debug.LogError(string.Format("{0}\n{1}", e.Message, e.StackTrace));
+                        Debug.LogError(string.Format("{0}\n{1}", e.Message, e.StackTrace));
 #else
-                    // runtime error handling
+    // runtime error handling
 #endif
+                    }
                 }
+                m_lateupdating = false;
+            }
+
+            if (m_lateupdateAddBuffer.Count > 0)
+            {
+                HashSet<UPDATE_FUNC>.Enumerator iter = m_lateupdateAddBuffer.GetEnumerator();
+                while (iter.MoveNext())
+                {
+                    RegisterLateUpdateFunc(iter.Current);
+                }
+                m_lateupdateAddBuffer.Clear();
             }
         }
 
+        private bool m_fixedupdating = false;
         protected override void OnFixedUpdate()
         {
             base.OnFixedUpdate();
-            HashSet<ON_FIXED_UPDATE>.Enumerator iter = fixedUpdateFuncs.GetEnumerator();
-            while (iter.MoveNext())
+            if (fixedUpdateFuncs.Count > 0)
             {
-                try
+                m_fixedupdating = true;
+                HashSet<UPDATE_FUNC>.Enumerator iter = fixedUpdateFuncs.GetEnumerator();
+                while (iter.MoveNext())
                 {
-                    iter.Current.Invoke(Time.deltaTime);
-                }
-                catch (Exception e)
-                {
+                    try
+                    {
+                        iter.Current.Invoke(Time.deltaTime);
+                    }
+                    catch (Exception e)
+                    {
 #if UNITY_EDITOR
-                    Debug.LogError(string.Format("{0}\n{1}", e.Message, e.StackTrace));
+                        Debug.LogError(string.Format("{0}\n{1}", e.Message, e.StackTrace));
 #else
-                    // runtime error handling
+    // runtime error handling
 #endif
+                    }
                 }
+                m_fixedupdating = false;
+            }
+
+            if (m_fixedupdateAddBuffer.Count > 0)
+            {
+                HashSet<UPDATE_FUNC>.Enumerator iter = m_fixedupdateAddBuffer.GetEnumerator();
+                while (iter.MoveNext())
+                {
+                    RegisterFixedUpdateFunc(iter.Current);
+                }
+                m_fixedupdateAddBuffer.Clear();
             }
         }
     }

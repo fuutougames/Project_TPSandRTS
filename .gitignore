@@ -3,3 +3,4 @@ Client/Temp/
 *.sln
 *.csproj
 Client/.vs/
+Client/PacketCodeBackup/

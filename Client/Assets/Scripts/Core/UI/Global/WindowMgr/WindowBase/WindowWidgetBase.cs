@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Common;
 using UnityEngine;
 
 /// <summary>
@@ -9,14 +10,29 @@ using UnityEngine;
 /// </summary>
 public class WindowWidgetBase
 {
-    private WindowBase m_WinRoot;
-    private RectTransform m_Root;
-    public RectTransform Root { get { return m_Root; } }
+    protected WindowBase m_winRoot;
+    protected RectTransform m_root;
+    public RectTransform Root { get { return m_root; } }
+    //protected Ticker m_ticker;
+    //public Ticker RootTicker { get { return m_ticker; } }
+
+    private Ticker m_ticker = null;
+
+    public Ticker RootTicker
+    {
+        get
+        {
+            if (m_ticker == null)
+                m_ticker = m_root.gameObject.AddComponent<Ticker>();
+            return m_ticker;
+        }
+    }
+    
 
     public virtual void BaseInit(WindowBase winRoot, RectTransform root)
     {
-        m_WinRoot = winRoot;
-        m_Root = root;
+        m_winRoot = winRoot;
+        m_root = root;
     }
 
     public virtual void Init()
@@ -43,4 +59,20 @@ public class WindowWidgetBase
     {
 
     }
+
+    public virtual void Update(float dt)
+    {
+
+    }
+
+    public virtual void FixedUpdate(float dt)
+    {
+
+    }
+
+    public virtual void LateUpdate(float dt)
+    {
+
+    }
+
 }

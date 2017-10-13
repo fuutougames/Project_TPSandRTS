@@ -12,8 +12,18 @@ public class WindowBase : IWindow
     protected GameObject m_objInstanceRoot;
     protected RectTransform m_transInstanceRoot;
     public RectTransform RootTrans { get { return m_transInstanceRoot; } }
-    protected Ticker m_ticker;
-    public Ticker RootTicker { get { return m_ticker; } }
+    private Ticker m_ticker = null;
+
+    public Ticker RootTicker
+    {
+        get
+        {
+            if (m_ticker == null)
+                m_ticker = m_objInstanceRoot.AddComponent<Ticker>();
+            return m_ticker;
+        }
+    }
+
     protected WindowInfo m_wiInfo;
 
     protected WindowBase()
@@ -55,7 +65,6 @@ public class WindowBase : IWindow
         m_iInstanceID = instanceId;
         m_objInstanceRoot = root;
         m_transInstanceRoot = root.GetComponent<RectTransform>();
-        m_ticker = m_objInstanceRoot.AddComponent<Ticker>();
     }
 
     /// <summary>
@@ -113,7 +122,6 @@ public class WindowBase : IWindow
     {
         Dispatcher.Dispatch(GameEvents.CommEvt.WINDOW_CLOSE_EVENT, m_iInstanceID);
     }
-
 
     #region widget related
 

@@ -1,0 +1,18 @@
+/*
+ * AUTO GENERATED FILE, DO NOT MODIFY
+ */
+
+using System.Collections;
+using System.Collections.Generic;
+
+namespace Network.Packets
+{
+    public partial class PacketFactory
+    {
+        private static Dictionary<int, PACKET_DISAESSEMBLER> m_PacketDisassemblerMap = new Dictionary<int, PACKET_DISAESSEMBLER>()
+        {
+#DISASSEMBLER_MAP#
+        };
+#DISASSEMBLERS#
+    }
+}

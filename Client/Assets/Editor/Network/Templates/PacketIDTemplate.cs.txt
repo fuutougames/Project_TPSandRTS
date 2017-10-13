@@ -1,0 +1,13 @@
+/*
+ * AUTO GENERATED FILE, DO NOT MODIFY
+ */
+
+using System;
+
+namespace Network.Packets
+{
+    public class PacketID
+    {
+#PACKET_ID#
+    }
+}
