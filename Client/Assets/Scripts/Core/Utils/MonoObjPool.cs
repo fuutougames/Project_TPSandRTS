@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,7 +14,7 @@ public class MonoObjPool<T> where T : MonoBehaviour, IMonoPoolItem
     private int m_MaxSize;
 
 
-    public MonoObjPool(T template, int maxSize = 64)
+    public MonoObjPool(T template, bool keepTemplate = true, int maxSize = 64)
     {
         if (maxSize < 8)
             maxSize = 8;
@@ -22,6 +22,9 @@ public class MonoObjPool<T> where T : MonoBehaviour, IMonoPoolItem
         m_Template = template;
         m_Stack = new Stack<T>();
         m_Template.OnReturn();
+
+        if (keepTemplate)
+            GameObject.DontDestroyOnLoad(template.gameObject);
     }
 
     private T CreateNewItem()

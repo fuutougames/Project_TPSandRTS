@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Battle;
 using Battle.Projectiles;
@@ -16,7 +16,7 @@ public class GlobalObjPools : Singleton<GlobalObjPools>
     {
         GameObject linearProjectile = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Projectiles/JHPProjectileTemplate"));
         ProjectileBase p = linearProjectile.GetComponent<ProjectileBase>();
-        _LinearProjectilPool = new MonoObjPool<ProjectileBase>(p, 1024);
+        _LinearProjectilPool = new MonoObjPool<ProjectileBase>(p, true, 1024);
         _ProjectilePools = new Dictionary<BattleDef.PROJECTILE_TYPE, MonoObjPool<ProjectileBase>>()
         {
             {

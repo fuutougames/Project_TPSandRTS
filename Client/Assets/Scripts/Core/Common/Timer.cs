@@ -1,139 +1,92 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public enum TimerStatus { New, Update, Pause, Resume, Stop, Dispose }
-
 public class Timer
 {
-    public delegate void UpdateTimerDelegate(float time);
-    public delegate void CompleteTimerDelegate();
-    public event UpdateTimerDelegate UpdateTimerCallback;
-    public event CompleteTimerDelegate CompleteTimerCallback;
-    public TimerStatus TimerStatus;
-    public float UpdateInterval { get; private set; }
-    public int IntervalCount { get; private set; }
-    public float remainingTime { get; private set; }
-    public float LastFramTime;
-    #region TimerManager
-    public static List<Timer> UpdateTimerList = new List<Timer>();
-
-    public static Timer GetTimer(float TimeSpan)
-    {
-        return GetTimer(1, TimeSpan);
-    }
-
-    public static Timer GetTimer(float UpdateInterval, float TimeSpan)
-    {
-
-        Timer timer = new Timer();
-        timer.remainingTime = TimeSpan;
-        timer.UpdateInterval = UpdateInterval;
-        timer.IntervalCount = Mathf.CeilToInt(timer.remainingTime / timer.UpdateInterval);
-        return timer;
-    }
-
-    public static void DisposeAllTimer()
-    {
-        for (int i = 0; i < UpdateTimerList.Count; i++)
-        {
-            UpdateTimerList[i].DisposeTimer();
-        }
-    }
-    #endregion
+    private float m_Interval = .0f;
+    private float m_Time = .0f;
 
     /// <summary>
-    /// 重置Timer, 如果在运行, 也会被停止
+    /// UpdateAction take remain time as parameter
     /// </summary>
-    public void ResetTimer(float updateInterval, float TimeSpan)
-    {
-        UpdateTimerList.Remove(this);
-        remainingTime = TimeSpan;
-        UpdateInterval = updateInterval;
-        IntervalCount = Mathf.CeilToInt(remainingTime / UpdateInterval);
-    }
+    public Action<float> UpdateAction = null;
+    public Action CompleteAction = null;
 
-    public void ResetTimer(float TimeSpan)
-    {
-        ResetTimer(1, TimeSpan);
-    }
+    private float m_StartTime;
+    private float m_LastUpdateTime;
+    private float m_PauseTime = .0f;
 
-    public void StartTimer()
-    {
-        this.TimerStatus = TimerStatus.Update;
-        UpdateTimerList.Add(this);
-        LastFramTime = Time.realtimeSinceStartup;
-    }
-
-
-    public void PauseTimer()
-    {
-        this.TimerStatus = TimerStatus.Pause;
-        UpdateTimerList.Remove(this);
-    }
-
-
-    public void ResumeTimer()
-    {
-        this.TimerStatus = TimerStatus.Update;
-        UpdateTimerList.Add(this);
-        LastFramTime = Time.realtimeSinceStartup;
-    }
-
-
-    public void DisposeTimer()
-    {
-        UpdateTimerList.Remove(this);
-        this.Dispose();
-    }
-
-
-    public void Dispose()
+    public Timer()
     {
 
     }
 
-
-    public void CompleteTimer()
+    public Timer(float time, float interval = .0001f)
     {
-        this.StopTimer();
-        this.DisposeTimer();
+        m_Time = time;
+        m_Interval = interval;
+        m_PauseTime = .0f;
     }
 
-
-    public void StopTimer()
+    public void ResetTimer(float time, float interval = .0001f)
     {
-        UpdateTimerList.Remove(this);
+        m_Time = time;
+        m_Interval = interval;
+        m_PauseTime = .0f;
     }
 
-
-    float IntervalTime = 0;
-    float deltaTime = 0;
-    public void UpdateTimer(float deltaTime1)
+    public void Update()
     {
-        if (remainingTime <= 0)
+        float realtimeFromStartup = TimeMgr.Instance.GetRealTimeFromeStartup();
+        float timeDiff = realtimeFromStartup - m_LastUpdateTime;
+        float remainTime = m_StartTime + m_PauseTime + m_Time - realtimeFromStartup;
+        remainTime = remainTime >= .0f ? remainTime : .0f;
+        if (timeDiff > m_Interval)
         {
-            if (CompleteTimerCallback != null)
+            if (UpdateAction != null)
             {
-                CompleteTimerCallback();
+                UpdateAction(remainTime);
             }
-            StopTimer();
-            return;
+            m_LastUpdateTime = realtimeFromStartup;
         }
-        deltaTime = Time.realtimeSinceStartup - LastFramTime;
-        LastFramTime = Time.realtimeSinceStartup;
-        if (IntervalTime >= UpdateInterval)
-        {
-            IntervalTime = 0;
-            IntervalCount--;
-            if (UpdateTimerCallback != null)
-            {
-                UpdateTimerCallback(remainingTime);
-            }
 
+        if (remainTime <= .0f)
+        {
+            if (CompleteAction != null)
+                CompleteAction.Invoke();
+
+            TimerMgr.Instance.UnregisterTimer(this);
         }
-        IntervalTime += deltaTime;
-        remainingTime -= deltaTime;
+    }
+
+    public void Pause()
+    {
+        m_LastUpdateTime = TimeMgr.Instance.GetRealTimeFromeStartup();
+        TimerMgr.Instance.UnregisterTimer(this);
+    }
+
+    public void Resume()
+    {
+        float realtimeFromStartup = TimeMgr.Instance.GetRealTimeFromeStartup();
+        m_PauseTime += realtimeFromStartup - m_LastUpdateTime;
+        TimerMgr.Instance.RegisterTimer(this);
+    }
+
+    public void Start()
+    {
+        m_StartTime = TimeMgr.Instance.GetRealTimeFromeStartup();
+        m_LastUpdateTime = m_StartTime;
+        m_PauseTime = .0f;
+        TimerMgr.Instance.RegisterTimer(this);
+    }
+
+    public void Stop(bool callComplete = true)
+    {
+        TimerMgr.Instance.UnregisterTimer(this);
+        if (callComplete)
+            if (CompleteAction != null)
+                CompleteAction.Invoke();
     }
 }
