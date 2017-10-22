@@ -1,49 +1,49 @@
-﻿using Battle.Projectiles;
+using Battle.Projectiles;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Battle.Data
 {
     [RequireComponent(typeof(PawnRuntimeData))]
-    public class Pawn : NetworkBase
+    public class Pawn : MonoBase
     {
-        private PawnPreloadData _PreloadData;
-        private PawnRuntimeData _RuntimeData;
-        private CapsuleCollider _CCollider;
+        private PawnPreloadData m_PreloadData;
+        private PawnRuntimeData m_RuntimeData;
 
-        public CapsuleCollider CCollider
+        private Collider m_PCollider;
+        public Collider PCollider
         {
             get
             {
-                if (_CCollider == null)
-                    _CCollider = gameObject.GetComponent<CapsuleCollider>();
-                return _CCollider;
+                if (m_PCollider == null)
+                    m_PCollider = GetComponent<Collider>();
+                return m_PCollider;
             }
         }
 
-        [Server]
+        //[Server]
         public void TakeDamage(float dmg, BattleDef.DAMAGE_TYPE dmgType)
         {
 #if _DEBUG
             //Debug.Log("Damage Taken!!!");
 #endif
-            if (!isServer)
-                return;
+            //if (!isServer)
+                //return;
 
-            float hp = _RuntimeData.HP - dmg;
-            if (hp < 0)
-            {
-                hp = 0;
-                //_SyncIsDead = true;
-            }
-            _RuntimeData.HP = hp;
+            //float hp = m_RuntimeData.HP - dmg;
+            //if (hp < 0)
+            //{
+            //    hp = 0;
+            //    //_SyncIsDead = true;
+            //}
+            //m_RuntimeData.HP = hp;
         }
 
 
         public virtual void OnProjectileCollide(ProjectileBase projectile, Vector3 hitPoint,
                 BattleDef.PROJECTILE_HITTYPE hitType, BattleDef.PROJECTILE_TYPE pType)
         {
-
+            Debug.Log("Pawn Hit!!!");
         }
     }
 }

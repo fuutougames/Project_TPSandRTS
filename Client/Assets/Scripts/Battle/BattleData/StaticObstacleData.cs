@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Battle;
 using Battle.Projectiles;
@@ -70,6 +70,7 @@ public class StaticObstacleData : MonoBase
     public virtual void OnProjectileCollide(ProjectileBase projectile, Vector3 hitPoint,
         BattleDef.PROJECTILE_HITTYPE hitType, BattleDef.PROJECTILE_TYPE pType)
     {
-        
+
+        Debug.Log("Static Obstacle Hit!!!");
     }
 }

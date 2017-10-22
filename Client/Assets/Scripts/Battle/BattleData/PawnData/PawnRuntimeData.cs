@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -6,23 +6,23 @@ using UnityEngine.Networking;
 namespace Battle.Data
 {
     using DataPacks;
-    public class PawnRuntimeData : NetworkBase
+    public class PawnRuntimeData : MonoBase
     {
         /// <summary>
         /// Unique id for pawn, generate by server
         /// </summary>
-        [SyncVar(hook = "OnHPChanged")] private float _SyncHP;
-        [SyncVar(hook = "OnMoveSpdChanged")] private float _SyncMoveSpd;
-        [SyncVar(hook = "OnArmorChanged")] private float _SyncArmor;
+        /*[SyncVar(hook = "OnHPChanged")]*/ private float _SyncHP;
+        /*[SyncVar(hook = "OnMoveSpdChanged")]*/ private float _SyncMoveSpd;
+        /*[SyncVar(hook = "OnArmorChanged")]*/ private float _SyncArmor;
 
         #region Getters and Setters
-        public NetworkInstanceId PawnId { get { return Identity.netId; } }
+        //public NetworkInstanceId PawnId { get { return Identity.netId; } }
         public float HP { get { return _SyncHP; } set { _SyncHP = value; } }
         public float MoveSpd { get { return _SyncMoveSpd; } set { _SyncMoveSpd = value; } }
         public float Armor { get { return _SyncArmor; } set { _SyncArmor = value; } }
         #endregion
 
-        [Server]
+        //[Server]
         public void Init(PawnDataPack datapack)
         {
             _SyncHP = datapack.Hp;
@@ -31,20 +31,21 @@ namespace Battle.Data
         }
 
         #region Realtime Sync Vars Change Callbacks
-        [Client]
+        //[Client]
         private void OnHPChanged(float hp)
         {
             _SyncHP = hp;
+
             // send info maybe?
         }
 
-        [Client]
+        //[Client]
         private void OnMoveSpdChanged(float moveSpd)
         {
             _SyncMoveSpd = moveSpd;
         }
 
-        [Client]
+        //[Client]
         private void OnArmorChanged(float armor)
         {
             _SyncArmor = armor;

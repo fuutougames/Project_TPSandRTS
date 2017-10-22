@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Battle.Projectiles
@@ -15,12 +15,12 @@ namespace Battle.Projectiles
             return base.CalculateDamage(hitData, remainDmg);
         }
 
-        public override bool ProcessHitData(List<PawnHitData> hitData, out int hitCnt)
+        public override bool ProcessHitData(List<PawnHitData> hitData, int hitDataLen, out int hitCnt)
         {
             hitCnt = 0;
             float dmgLost = 0;
             float remainDmg = _DmgLine.GetRemainDmgByTime(TimeMgr.Instance.GetCurrentTime());
-            for (int i = 0; i < hitData.Count; ++i)
+            for (int i = 0; i < hitDataLen; ++i)
             {
                 if (Mathf.Abs(hitData[i].HitDistance - float.MaxValue) <= Mathf.Epsilon)
                 {

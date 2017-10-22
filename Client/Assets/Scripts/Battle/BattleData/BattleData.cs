@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Battle.Data;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -99,7 +99,7 @@ namespace Battle
                 int hitCnt;
                 // process hit data
                 // TODO: implement process function for every projectile
-                projectile.ProcessHitData(_HitedPawnList, out hitCnt);
+                projectile.ProcessHitData(_HitedPawnList, _HitedPawnCnt, out hitCnt);
 
                 // display hit effect
                 for (int i = 0; i < hitCnt; ++i)

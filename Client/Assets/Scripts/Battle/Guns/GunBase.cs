@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Battle.Data;
 using UnityEngine;
@@ -8,7 +8,7 @@ namespace Battle.Guns
 {
     using Projectiles;
 
-    public class GunBase : NetworkBase
+    public class GunBase : MonoBase
     {
         [SerializeField] public Transform MuzzleTrans;
         [SerializeField] public List<Transform> AttachmentSlots;
@@ -62,7 +62,7 @@ namespace Battle.Guns
         /// <summary>
         /// single shot
         /// </summary>
-        [Server]
+        //[Server]
         public void Fire()
         {
             //base.Fire();
@@ -91,7 +91,12 @@ namespace Battle.Guns
             RpcFireOnClient(MuzzleTrans.position, direction);
         }
         
-        [ClientRpc]
+        //[ClientRpc]
+        /// <summary>
+        /// TODO: function called by client, need modify
+        /// </summary>
+        /// <param name="firePos"></param>
+        /// <param name="fireDir"></param>
         private void RpcFireOnClient(Vector3 firePos, Vector3 fireDir)
         {
             ProjectileBase projectile = CreateProjectile();
@@ -120,9 +125,9 @@ namespace Battle.Guns
 
         }
 
-        void FixedUpdate()
+        protected override void OnFixedUpdate()
         {
-            if (_IsFiring && isServer)
+            if (_IsFiring)
             {
                 Fire();
             }

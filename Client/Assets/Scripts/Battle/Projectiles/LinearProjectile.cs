@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -35,7 +35,7 @@ namespace Battle.Projectiles
             {
                 // TODO:dispose or recycle projectile here;
                 CachedTransform.position = _SyncStartPos + _SyncDirection*_RealRange;
-                Debug.LogError("Instance: " + this.GetInstanceID() + " Exceed Range, Request Dispose");
+                //Debug.LogError("Instance: " + this.GetInstanceID() + " Exceed Range, Request Dispose");
                 DisposeProjectile();
             }
             else
@@ -79,7 +79,7 @@ namespace Battle.Projectiles
             Ray ray = new Ray(_SyncStartPos, _SyncDirection);
             RaycastHit[] hits = Physics.RaycastAll(ray, _PBData.MaxRange, ~GameLayer.ObstacleCollider);
             float dmgRemain = _PBData.BaseDamage;
-            float projectileStartTime = Time.realtimeSinceStartup;
+            float projectileStartTime = TimeMgr.Instance.GetCurrentTime();
             _DmgLine.AddNode(projectileStartTime, dmgRemain, null, _SyncStartPos, 0);
             _DmgLine.StartPos = _SyncStartPos;
             bool projectileBlocked = false;
@@ -182,164 +182,66 @@ namespace Battle.Projectiles
             return 0;
         }
 
+        // hit ray
+        private Ray ray1 = new Ray();
+        // inverse hit ray
+        private Ray ray2 = new Ray();
         /// <summary>
-        /// 
+        /// Projectile collide function
         /// </summary>
-        /// <param name="start"></param>
-        /// <param name="dir"></param>
-        /// <param name="center"></param>
-        /// <param name="radius"></param>
-        /// <param name="hitPoint1"></param>
-        /// <param name="hitPoint2"></param>
+        /// <param name="start">projectile position</param>
+        /// <param name="end">projectile position in next frame</param>
+        /// <param name="collider">target collider</param>
+        /// <param name="capTrans">transform of target collider</param>
+        /// <param name="hitPoint1">hit in point</param>
+        /// <param name="hitPoint2">hit out point</param>
         /// <returns></returns>
-        protected bool IntersectWithSphere(Vector3 start, Vector3 dir, Vector3 center, float radius,
+        protected BattleDef.PROJECTILE_HITTYPE IntersectWithCollider(Vector3 start, Vector3 end, 
+            Collider collider, Transform capTrans,
             out Vector3 hitPoint1, out Vector3 hitPoint2)
         {
-
-            hitPoint1 = Vector3.zero;
-            hitPoint2 = Vector3.zero;
-            Vector3 startToUpCenter = center - start;
-            float tmp = Vector3.Dot(startToUpCenter, dir);
-            Vector3 closestPoint2Center = start + tmp*dir;
-            Vector3 center2ClosestPointVec = closestPoint2Center - center;
-
-            if (center2ClosestPointVec.magnitude >= radius)
+            Vector3 dir = end - start;
+            if (dir.magnitude > (_DmgLine.EndPos - start).magnitude)
             {
-                return false;
-            }
-            float halfSegment = Mathf.Sqrt(radius*radius + center2ClosestPointVec.sqrMagnitude);
-            hitPoint1 = closestPoint2Center - halfSegment*dir;
-            hitPoint2 = closestPoint2Center + halfSegment*dir;
-
-            return true;
-        }
-
-        /// <summary>
-        /// The Y-axis of capsule collider must be Vector3.up;
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <param name="capsule"></param>
-        /// <returns>0: collide in; 1: collide out; 2: penetrate; other: no collide</returns>
-        protected BattleDef.PROJECTILE_HITTYPE IntersectWithCapsuleCollider(Vector3 start, Vector3 end,
-            CapsuleCollider capsule, Transform capTransform,
-            out Vector3 hitPoint, out Vector3 hitPoint2)
-        {
-            hitPoint = Vector3.zero;
-            hitPoint2 = Vector3.zero;
-
-            Vector3 localStart = capTransform.InverseTransformPoint(start) - capsule.center;
-            Vector3 localEnd = capTransform.InverseTransformPoint(end) - capsule.center;
-
-            // line is above or below the capsule;
-            float cylinderHeight = capsule.height - capsule.radius*2;
-            cylinderHeight = cylinderHeight > 0 ? cylinderHeight : 0;
-            float halfHeight = cylinderHeight/2.0f;
-            float maxHeight = halfHeight + capsule.radius;
-            float minHeight = -maxHeight;
-            if (localStart.y > maxHeight && localEnd.y > maxHeight)
-            {
+                hitPoint1 = Vector3.zero;
+                hitPoint2 = Vector3.zero;
                 return BattleDef.PROJECTILE_HITTYPE.NONE;
             }
-
-            if (localStart.y < minHeight && localEnd.y < minHeight)
+            
+            float maxdist = dir.magnitude;
+            if (maxdist <= Mathf.Epsilon)
             {
+                hitPoint1 = Vector3.zero;
+                hitPoint2 = Vector3.zero;
                 return BattleDef.PROJECTILE_HITTYPE.NONE;
             }
+            dir.Normalize();
+            ray1.origin = start;
+            ray1.direction = dir;
+            ray2.origin = end;
+            ray2.direction = -dir;
+            RaycastHit hit;
+            bool isHit = collider.Raycast(ray1, out hit, maxdist);
+            if (isHit)
+                hitPoint1 = hit.point;
+            else
+                hitPoint1 = Vector3.zero;
 
-            Vector2 projectOnXZ_Start = new Vector2(localStart.x, localStart.z);
-            Vector2 projectOnXZ_End = new Vector2(localEnd.x, localEnd.z);
-            Vector3 posDiff = (localEnd - localStart);
-            Vector3 lineDir = posDiff.normalized;
-            Vector2 ProjectOnXZ_lineDir = new Vector2(lineDir.x, lineDir.z);
-            float maxDirWeight = posDiff.magnitude;
-            float tmp = Vector3.Dot(lineDir, -localStart);
+            bool isInverseHit = collider.Raycast(ray2, out hit, maxdist);
 
-            // projection of line is not intersect with the projection of capsule, no collision
-            if (tmp < 0 && projectOnXZ_Start.magnitude > capsule.radius)
-            {
-                return BattleDef.PROJECTILE_HITTYPE.NONE;
-            }
-            if (Vector3.Dot(-projectOnXZ_End, lineDir) > 0 && projectOnXZ_End.magnitude > capsule.radius)
-            {
-                return BattleDef.PROJECTILE_HITTYPE.NONE;
-            }
-            Vector2 closestPointOnXZ = projectOnXZ_Start + tmp*ProjectOnXZ_lineDir;
-            float magnitudeOfColsestPiont = closestPointOnXZ.magnitude;
-            if (magnitudeOfColsestPiont > capsule.radius)
-            {
-                return BattleDef.PROJECTILE_HITTYPE.NONE;
-            }
+            if (isInverseHit)
+                hitPoint2 = hit.point;
+            else
+                hitPoint2 = Vector3.zero;
 
-            Vector3 upCenter = new Vector3(.0f, .0f, halfHeight), downCenter = new Vector3(.0f, .0f, -halfHeight);
-            Vector3 sHitPoint1, sHitPoint2;
-            float halfSegment =
-                Mathf.Sqrt(capsule.radius*capsule.radius - magnitudeOfColsestPiont*magnitudeOfColsestPiont);
-            Vector2 projectPossibleIntersectPoint1 = closestPointOnXZ - halfSegment*ProjectOnXZ_lineDir.normalized;
-            Vector2 projectPossibleIntersectPoint2 = closestPointOnXZ + halfSegment*ProjectOnXZ_lineDir.normalized;
-            float dirWeight1 = (projectPossibleIntersectPoint1.x - projectOnXZ_Start.x)/ProjectOnXZ_lineDir.x;
-            float dirWeight2 = (projectPossibleIntersectPoint2.x - projectOnXZ_Start.x)/ProjectOnXZ_lineDir.x;
-            Vector3 intersectPoint1 = localStart + dirWeight1*lineDir;
-            Vector3 intersectPoint2 = localStart + dirWeight2*lineDir;
-            bool notIntersectWithCylinder = (intersectPoint1.y > upCenter.y && intersectPoint2.y > upCenter.y) ||
-                                            (intersectPoint1.y < downCenter.y && intersectPoint2.y < downCenter.y);
-            // if intersect with up sphere
-            bool notIntersectWithUpSphere =
-                !IntersectWithSphere(localStart, lineDir, upCenter, capsule.radius, out sHitPoint1, out sHitPoint2);
-            if (!notIntersectWithUpSphere)
-            {
-                if (sHitPoint1.y > upCenter.y)
-                    intersectPoint1 = sHitPoint1;
-                if (sHitPoint2.y > upCenter.y)
-                    intersectPoint2 = sHitPoint2;
-            }
-
-            // if intersect with down sphere
-            bool notIntersectWithDownSphere =
-                !IntersectWithSphere(localStart, lineDir, downCenter, capsule.radius, out sHitPoint1, out sHitPoint2);
-            if (!notIntersectWithDownSphere)
-            {
-                if (sHitPoint1.y < downCenter.y)
-                    intersectPoint1 = sHitPoint1;
-                if (sHitPoint2.y < downCenter.y)
-                    intersectPoint2 = sHitPoint2;
-            }
-
-            if (notIntersectWithCylinder && notIntersectWithDownSphere && notIntersectWithUpSphere)
-            {
-                return BattleDef.PROJECTILE_HITTYPE.NONE;
-            }
-
-            dirWeight1 = (intersectPoint1.x - localStart.x)/lineDir.x;
-            dirWeight2 = (intersectPoint2.x - localStart.x)/lineDir.x;
-
-            hitPoint = intersectPoint1;
-            hitPoint2 = intersectPoint2;
-            // not arrive yet;
-            if (dirWeight1 < 0 && dirWeight2 < 0)
-            {
-                return BattleDef.PROJECTILE_HITTYPE.NONE;
-            }
-            // passed already
-            if (dirWeight1 > maxDirWeight && dirWeight2 > maxDirWeight)
-            {
-                return BattleDef.PROJECTILE_HITTYPE.NONE;
-            }
-            // in the capsule and no collide with any surface;
-            if (dirWeight1 < 0 && dirWeight2 > maxDirWeight)
-            {
-                return BattleDef.PROJECTILE_HITTYPE.NONE;
-            }
-
-            // collide into the capsule
-            if (dirWeight1 > 0 && dirWeight2 > maxDirWeight)
+            if (isHit && !isInverseHit)
                 return BattleDef.PROJECTILE_HITTYPE.IN;
-
-            // collide out of the capsule
-            if (dirWeight1 < 0 && dirWeight2 < maxDirWeight)
+            else if (!isHit && isInverseHit)
                 return BattleDef.PROJECTILE_HITTYPE.OUT;
+            else if (isHit && isInverseHit)
+                return BattleDef.PROJECTILE_HITTYPE.PENETRATE;
 
-            return BattleDef.PROJECTILE_HITTYPE.PENETRATE;
+            return BattleDef.PROJECTILE_HITTYPE.NONE;
         }
 
         public override BattleDef.PROJECTILE_HITTYPE IsCollideWithPawn(float time, Pawn cbData,
@@ -351,9 +253,10 @@ namespace Battle.Projectiles
             Vector3 projectilePos = _DmgLine.GetPositionByTime(time);
             Vector3 projectilePosNext = _DmgLine.GetPositionByTime(time + TimeMgr.Instance.GetDeltaTime());
 
+
             Vector3 hitPoint1, hitPoint2;
-            BattleDef.PROJECTILE_HITTYPE hitType = IntersectWithCapsuleCollider(projectilePos, projectilePosNext,
-                cbData.CCollider, cbData.CachedTransform,
+            BattleDef.PROJECTILE_HITTYPE hitType = IntersectWithCollider(projectilePos, projectilePosNext,
+                cbData.PCollider, cbData.CachedTransform,
                 out hitPoint1, out hitPoint2);
             if (hitType != BattleDef.PROJECTILE_HITTYPE.NONE)
             {

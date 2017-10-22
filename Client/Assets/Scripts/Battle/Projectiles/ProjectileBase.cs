@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -14,10 +14,11 @@ namespace Battle.Projectiles
     public class ProjectileBase : MonoBase, IMonoPoolItem
     {
         #region Sync Var
+        // not gonna use HLAPI, use LLAPI instead
 
         //[SyncVar(hook = "OnProjectileTrigger")] protected bool _SyncIsTriggered = false;
-        /*[SyncVar(hook = "OnProjectileStartPosSet")]*/ protected Vector3 _SyncStartPos;
-        /*[SyncVar(hook = "OnProjectileDirectionSet")]*/ protected Vector3 _SyncDirection;
+        protected Vector3 _SyncStartPos;
+        protected Vector3 _SyncDirection;
         //[SyncVar] protected float _SyncRealRange;
 
         #endregion
@@ -57,7 +58,7 @@ namespace Battle.Projectiles
             // must call after pos and dir set;
             //_SyncIsTriggered = true;
 #if UNITY_EDITOR
-            Debug.LogError("Instance: " + this.GetInstanceID() + " Enable Trail on frame " + framecnt);
+            //Debug.LogError("Instance: " + this.GetInstanceID() + " Enable Trail on frame " + framecnt);
 #endif
             if (_TrailEffect != null)
                 _TrailEffect.enabled = true;
@@ -153,7 +154,7 @@ namespace Battle.Projectiles
         /// <param name="hitData">hit data list</param>
         /// <param name="hitCnt">return how many character hit data is actually valid</param>
         /// <returns>is projectile life end, true end, false not end</returns>
-        public virtual bool ProcessHitData(List<PawnHitData> hitData, out int hitCnt)
+        public virtual bool ProcessHitData(List<PawnHitData> hitData, int hitDataLen, out int hitCnt)
         {
             hitCnt = 0;
             return false;
@@ -194,7 +195,7 @@ namespace Battle.Projectiles
                 _TrailEffect.enabled = false;
             }
 #if UNITY_EDITOR
-            Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Dispose on frame " + framecnt);
+            //Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Dispose on frame " + framecnt);
 #endif
             yield return new WaitUntil(() => framecnt > curframe + 3);
             // move it to a remote place, do not change it's active state
@@ -202,7 +203,7 @@ namespace Battle.Projectiles
             // this projectile in next frame to make sure trail renderer won't be activated too early;
             CachedTransform.position = new Vector3(100000, 100000, 100000);
 #if UNITY_EDITOR
-            Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Move away on frame " + framecnt);
+            //Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Move away on frame " + framecnt);
 #endif
 
 
@@ -215,7 +216,7 @@ namespace Battle.Projectiles
 #endif
             }
 #if UNITY_EDITOR
-            Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Return on frame " + framecnt);
+            //Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Return on frame " + framecnt);
 #endif
             pool.Push(this);
         }
