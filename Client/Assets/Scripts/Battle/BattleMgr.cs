@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Battle.Data;
 using Common;
 
@@ -11,6 +11,7 @@ namespace Battle
 
         private BattleSceneData _SceneData;
         public BattleSceneData SceneData { get { return _SceneData; } }
+
 
         public void Reset()
         {

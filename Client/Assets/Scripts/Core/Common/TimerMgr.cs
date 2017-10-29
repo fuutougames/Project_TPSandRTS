@@ -8,6 +8,7 @@ public class TimerMgr : MonoSingleton<TimerMgr>
     private HashSet<Timer> m_TickingTimer;
     private HashSet<Timer> m_AddToUpdateListBuffer;
     private HashSet<Timer> m_RemoveFromUpdateListBuffer;
+    private HashSet<Timer> m_ReturnBuffer;
 
     private bool m_Ticking = false;
 
@@ -20,6 +21,7 @@ public class TimerMgr : MonoSingleton<TimerMgr>
         m_TickingTimer = new HashSet<Timer>();
         m_AddToUpdateListBuffer = new HashSet<Timer>();
         m_RemoveFromUpdateListBuffer = new HashSet<Timer>();
+        m_ReturnBuffer = new HashSet<Timer>();
     }
 
     public Timer GetTimer()
@@ -29,6 +31,13 @@ public class TimerMgr : MonoSingleton<TimerMgr>
 
     public void ReturnTimer(Timer timer)
     {
+        if (m_TickingTimer.Contains(timer))
+        {
+            if (m_ReturnBuffer.Contains(timer))
+                return;
+            m_ReturnBuffer.Add(timer);
+            return;
+        }
         m_TimerPool.Push(timer);
     }
 
@@ -101,6 +110,17 @@ public class TimerMgr : MonoSingleton<TimerMgr>
             {
                 m_TickingTimer.Remove(iter.Current);
             }
+            m_RemoveFromUpdateListBuffer.Clear();
+        }
+
+        if (m_ReturnBuffer.Count > 0)
+        {
+            iter = m_ReturnBuffer.GetEnumerator();
+            while (iter.MoveNext())
+            {
+                m_TimerPool.Push(iter.Current);
+            }
+            m_ReturnBuffer.Clear();
         }
     }
 }

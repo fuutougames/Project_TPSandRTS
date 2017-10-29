@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Battle;
 using Battle.Data;
@@ -48,7 +48,7 @@ public class ProjectileTest : MonoBehaviour {
 	    // do shoot;
 	    ProjectileBase ins = GameObject.Instantiate(projectile.gameObject).GetComponent<ProjectileBase>();
         ins.Init(data);
-        ins.TriggerProjectile(CachedTransform.position, CachedTransform.forward);
+        ins.TriggerProjectile(CachedTransform.position, CachedTransform.forward, 0);
     }
 
     public void TriggerProjectiles()

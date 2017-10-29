@@ -15,6 +15,20 @@ namespace Battle.Projectiles
         protected ProjectileDmgLine _DmgLine = new ProjectileDmgLine();
         public Action<ProjectileDmgLineNode> OnCollideAction;
 
+        private float _RealRange;
+        protected float RealRange
+        {
+            get { return _RealRange; }
+            set { _RealRange = value; }
+        }
+        private float _CurrentMagnitude;
+        protected float CurrentMagnitude
+        {
+            get { return _CurrentMagnitude; }
+            set { _CurrentMagnitude = value; }
+        }
+
+
         /// <summary>
         /// Init CLIENT & SERVER infos, like _BaseDamage, _Velocity, etc ...
         /// </summary>
@@ -31,10 +45,12 @@ namespace Battle.Projectiles
         protected override void UpdatePosition()
         {
             Vector3 newPos = CachedTransform.position + _SyncDirection*_PBData.Velocity*TimeMgr.Instance.GetDeltaTime();
-            if (Vector3.Distance(newPos, _SyncStartPos) > _RealRange)
+            float newMagnitude = Vector3.Distance(newPos, _SyncStartPos);
+            if (newMagnitude > RealRange)
             {
+                newMagnitude = RealRange;
                 // TODO:dispose or recycle projectile here;
-                CachedTransform.position = _SyncStartPos + _SyncDirection*_RealRange;
+                CachedTransform.position = _SyncStartPos + _SyncDirection*RealRange;
                 //Debug.LogError("Instance: " + this.GetInstanceID() + " Exceed Range, Request Dispose");
                 DisposeProjectile();
             }
@@ -42,19 +58,22 @@ namespace Battle.Projectiles
             {
                 CachedTransform.position = newPos;
             }
+            CurrentMagnitude = newMagnitude;
         }
 
-        protected override void OnFixedUpdate()
+        protected override void OnUpdate()
         {
             if (_Disposed)
                 return;
 
-            base.OnFixedUpdate();
+            base.OnUpdate();
+
             float now = TimeMgr.Instance.GetCurrentTime();
-            int curIdx = _DmgLine.GetPassedIdxByTime(now);
+            //int curIdx = _DmgLine.GetPassedIdxByTime(now);
+            int curIdx = _DmgLine.GetPassedIdxByCurMagnitude(CurrentMagnitude);
             for (int i = 0; i <= curIdx; ++i)
             {
-                if (!_DmgLine.Nodes[i].Triggred)
+                if (!_DmgLine.Nodes[i].Triggred && _DmgLine.Nodes[i].Distance <= (RealRange + 0.001f))
                 {
                     if (_DmgLine.Nodes[i].Obstacle != null)
                     {
@@ -69,19 +88,20 @@ namespace Battle.Projectiles
         }
 
         /// <summary>
-        /// Calculate Projectile's Damage Line before it's triggered;
+        /// Calculate Projectile's Damage Line before it's update;
+        /// IT SHOULD BE CALLED AT THE BattleData.UpdateProjectiles FUNCTION ON THE LIFE CYCLE'S FIRST FRAME OF THIS PROJECTILE.
         /// Client should have DmgLine data too, for showing hit effect by itself;
         /// </summary>
-        protected override void BeforeProjectileTrigger()
+        public override void PreCalculateOnFirstFrame()
         {
-            base.BeforeProjectileTrigger();
+            base.PreCalculateOnFirstFrame();
             _DmgLine.ClearNode();
             Ray ray = new Ray(_SyncStartPos, _SyncDirection);
             RaycastHit[] hits = Physics.RaycastAll(ray, _PBData.MaxRange, ~GameLayer.ObstacleCollider);
             float dmgRemain = _PBData.BaseDamage;
             float projectileStartTime = TimeMgr.Instance.GetCurrentTime();
-            _DmgLine.AddNode(projectileStartTime, dmgRemain, null, _SyncStartPos, 0);
             _DmgLine.StartPos = _SyncStartPos;
+            _DmgLine.AddNode(dmgRemain, null, _SyncStartPos, 0);
             bool projectileBlocked = false;
             for (int i = 0; i < hits.Length; ++i)
             {
@@ -98,11 +118,11 @@ namespace Battle.Projectiles
                 if (!obstacle.Penetrable)
                 {
                     _DmgLine.SetStartAndEndTime(projectileStartTime, projectileStartTime + hit.distance/ _PBData.Velocity);
-                    _RealRange = hit.distance;
+                    RealRange = hit.distance;
                     _DmgLine.EndPos = _SyncStartPos + _SyncDirection*hit.distance;
-                    _DmgLine.RealRange = _RealRange;
+                    _DmgLine.RealRange = RealRange;
                     _DmgLine.SetStartAndEndTime(projectileStartTime, timeNode);
-                    _DmgLine.AddNode(timeNode, 0, obstacle, _DmgLine.EndPos, 0);
+                    _DmgLine.AddNode(0, obstacle, _DmgLine.EndPos, 0);
                     projectileBlocked = true;
                     break;
                 }
@@ -144,28 +164,28 @@ namespace Battle.Projectiles
                 if (dmgRemain <= 0)
                 {
                     // projectile stop here
-                    _RealRange = hit.distance;
+                    RealRange = hit.distance;
                     _DmgLine.EndPos = _SyncStartPos + _SyncDirection*hit.distance;
-                    _DmgLine.RealRange = _RealRange;
+                    _DmgLine.RealRange = RealRange;
                     _DmgLine.SetStartAndEndTime(projectileStartTime, timeNode);
-                    _DmgLine.AddNode(timeNode, 0, obstacle, hit.point, BattleDef.PROJECTILE_HITTYPE.IN);
+                    _DmgLine.AddNode(0, obstacle, hit.point, BattleDef.PROJECTILE_HITTYPE.IN);
                     projectileBlocked = true;
                     break;
                 }
-                _DmgLine.AddNode(timeNode, dmgRemain, obstacle, hit.point, BattleDef.PROJECTILE_HITTYPE.IN);
-                _DmgLine.AddNode(timeNode + penLen/ _PBData.Velocity, dmgRemain, obstacle, targetPoint,
+                _DmgLine.AddNode(dmgRemain, obstacle, hit.point, BattleDef.PROJECTILE_HITTYPE.IN);
+                _DmgLine.AddNode(dmgRemain, obstacle, targetPoint,
                     BattleDef.PROJECTILE_HITTYPE.OUT);
             }
 
             // if projectile is not blocked, it should stop at it's max range;
             if (!projectileBlocked)
             {
-                _RealRange = _PBData.MaxRange;
+                RealRange = _PBData.MaxRange;
                 _DmgLine.EndPos = _SyncStartPos + _SyncDirection* _PBData.MaxRange;
                 _DmgLine.RealRange = _PBData.MaxRange;
                 float timeNode = projectileStartTime + _PBData.MaxRange / _PBData.Velocity;
                 _DmgLine.SetStartAndEndTime(projectileStartTime, timeNode);
-                _DmgLine.AddNode(timeNode, dmgRemain, null, _DmgLine.EndPos, BattleDef.PROJECTILE_HITTYPE.IN);
+                _DmgLine.AddNode(dmgRemain, null, _DmgLine.EndPos, BattleDef.PROJECTILE_HITTYPE.IN);
             }
         }
 
@@ -201,12 +221,6 @@ namespace Battle.Projectiles
             out Vector3 hitPoint1, out Vector3 hitPoint2)
         {
             Vector3 dir = end - start;
-            if (dir.magnitude > (_DmgLine.EndPos - start).magnitude)
-            {
-                hitPoint1 = Vector3.zero;
-                hitPoint2 = Vector3.zero;
-                return BattleDef.PROJECTILE_HITTYPE.NONE;
-            }
             
             float maxdist = dir.magnitude;
             if (maxdist <= Mathf.Epsilon)
@@ -223,7 +237,15 @@ namespace Battle.Projectiles
             RaycastHit hit;
             bool isHit = collider.Raycast(ray1, out hit, maxdist);
             if (isHit)
+            {
                 hitPoint1 = hit.point;
+                if ((hitPoint1 - _SyncStartPos).magnitude > RealRange)
+                {
+                    hitPoint1 = Vector3.zero;
+                    hitPoint2 = Vector3.zero;
+                    return BattleDef.PROJECTILE_HITTYPE.NONE;
+                }
+            }
             else
                 hitPoint1 = Vector3.zero;
 
@@ -278,9 +300,9 @@ namespace Battle.Projectiles
             return hitType;
         }
 
-        public override bool IsCollideWithDynamicObstacle(float time, DynamicObstacleData doData, out Vector3 hitPoint)
-        {
-            return base.IsCollideWithDynamicObstacle(time, doData, out hitPoint);
-        }
+        //public override bool IsCollideWithDynamicObstacle(float time, DynamicObstacleData doData, out Vector3 hitPoint)
+        //{
+        //    return base.IsCollideWithDynamicObstacle(time, doData, out hitPoint);
+        //}
     }
 }

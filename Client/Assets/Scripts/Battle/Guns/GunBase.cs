@@ -19,6 +19,7 @@ namespace Battle.Guns
         [SerializeField] private BattleDef.PROJECTILE_TYPE _ProjectileType;
 
         private GunBattleData _GBData;
+        private Pawn _Owner;
 
         private ProjectileBattleData _PBData = new ProjectileBattleData()
         {
@@ -66,6 +67,7 @@ namespace Battle.Guns
         public void Fire()
         {
             //base.Fire();
+            // if is server, fire
             float now = TimeMgr.Instance.GetCurrentTime();
             if (now - _LastFireTime < _FireInterval)
                 return;
@@ -85,25 +87,34 @@ namespace Battle.Guns
             // temporary trigger
             projectile.Init(_PBData);
             // calculate it with angle instead of xy offset;
-            projectile.TriggerProjectile(MuzzleTrans.position, direction);
+            int side = 0;
+            if (_Owner != null)
+                side = _Owner.Side;
+
+            projectile.TriggerProjectile(MuzzleTrans.position, direction, side);
             OnFire();
 
-            RpcFireOnClient(MuzzleTrans.position, direction);
+            // if is client, request fire then
+            //RpcFireOnClient(MuzzleTrans.position, direction);
         }
         
         //[ClientRpc]
         /// <summary>
-        /// TODO: function called by client, need modify
+        /// TODO: Receive fire request from client
         /// </summary>
         /// <param name="firePos"></param>
         /// <param name="fireDir"></param>
-        private void RpcFireOnClient(Vector3 firePos, Vector3 fireDir)
-        {
-            ProjectileBase projectile = CreateProjectile();
-            projectile.Init(_PBData);
-            projectile.TriggerProjectile(firePos, fireDir);
-            OnFire();
-        }
+        //private void RpcFireOnClient(Vector3 firePos, Vector3 fireDir)
+        //{
+        //    ProjectileBase projectile = CreateProjectile();
+        //    projectile.Init(_PBData);
+        //    int side = 0;
+        //    if (_Owner != null)
+        //        side = _Owner.Side;
+
+        //    projectile.TriggerProjectile(firePos, fireDir, side);
+        //    OnFire();
+        //}
 
         private ProjectileBase CreateProjectile()
         {
@@ -132,6 +143,5 @@ namespace Battle.Guns
                 Fire();
             }
         }
-
     }
 }

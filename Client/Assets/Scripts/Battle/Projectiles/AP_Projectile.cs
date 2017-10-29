@@ -19,7 +19,7 @@ namespace Battle.Projectiles
         {
             hitCnt = 0;
             float dmgLost = 0;
-            float remainDmg = _DmgLine.GetRemainDmgByTime(TimeMgr.Instance.GetCurrentTime());
+            float remainDmg = _DmgLine.GetRemainDmgByCurMagnitude(CurrentMagnitude);
             for (int i = 0; i < hitDataLen; ++i)
             {
                 if (Mathf.Abs(hitData[i].HitDistance - float.MaxValue) <= Mathf.Epsilon)
@@ -40,14 +40,14 @@ namespace Battle.Projectiles
 
                 if (remainDmg <= 0)
                 {
-                    _RealRange = Vector3.Distance(hitData[i].HitPoints[0], _SyncStartPos);
+                    RealRange = Vector3.Distance(hitData[i].HitPoints[0], _SyncStartPos);
                     return true;
                 }
             }
 
             if (remainDmg > 0)
             {
-                _RealRange = Vector3.Distance(_DmgLine.UpdateDmgLine(TimeMgr.Instance.GetCurrentTime(), dmgLost), _SyncStartPos);
+                RealRange = Vector3.Distance(_DmgLine.UpdateDmgLine(TimeMgr.Instance.GetCurrentTime(), dmgLost), _SyncStartPos);
             }
             return false;
         }

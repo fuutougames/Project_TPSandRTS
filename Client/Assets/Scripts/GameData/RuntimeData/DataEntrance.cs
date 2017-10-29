@@ -1,8 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Common;
 using Data.DataMgr;
-using Data.DataIns;
 
 public class DataEntrance : Singleton<DataEntrance>
 {

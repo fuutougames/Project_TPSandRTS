@@ -20,6 +20,14 @@ namespace Battle.Projectiles
         protected Vector3 _SyncStartPos;
         protected Vector3 _SyncDirection;
         //[SyncVar] protected float _SyncRealRange;
+        private int _SyncSide;
+        public int SyncSide
+        {
+            get
+            {
+                return _SyncSide;
+            }
+        }
 
         #endregion
 
@@ -30,7 +38,6 @@ namespace Battle.Projectiles
 
         #region Inner Var
         //private bool _IsFirstFrameIgnored = false;
-        protected float _RealRange;
         [SerializeField]
         protected BattleDef.PROJECTILE_TYPE _ProjectileType;
 
@@ -47,14 +54,19 @@ namespace Battle.Projectiles
 
         // frame count after trigger;
         private int framecnt = 0;
+        private bool _PreCalculated = false;
+        public bool PreCalculated { get { return _PreCalculated; } }
         //private bool _DisposeLock = false;
+
 
         #endregion
 
-        public void TriggerProjectile(Vector3 startPos, Vector3 direction)
+        public void TriggerProjectile(Vector3 startPos, Vector3 direction, int side)
         {
             _SyncStartPos = startPos;
             _SyncDirection = direction;
+
+            _SyncSide = side;
             // must call after pos and dir set;
             //_SyncIsTriggered = true;
 #if UNITY_EDITOR
@@ -72,7 +84,7 @@ namespace Battle.Projectiles
             yield return null;
             CachedTransform.position = _SyncStartPos;
             CachedTransform.forward = _SyncDirection;
-            BeforeProjectileTrigger();
+            //BeforeProjectileTrigger();
             RegisterProjectile();
             framecnt = 0;
             _Disposed = false;
@@ -113,9 +125,9 @@ namespace Battle.Projectiles
         /// <summary>
         /// 
         /// </summary>
-        protected virtual void BeforeProjectileTrigger()
+        public virtual void PreCalculateOnFirstFrame()
         {
-
+            _PreCalculated = true;
         }
 
         #region Collide Judge interfaces
@@ -182,9 +194,54 @@ namespace Battle.Projectiles
             UnRegisterProjectile();
             _Disposed = true;
             //delay execute to make sure trail renderer is render correctly
+            OnDelayDispose();
+            /*
             StartCoroutine(OnDelayDispose());
+            */
         }
 
+        private void OnDelayDispose()
+        {
+
+            Timer timer1 = TimerMgr.Instance.GetTimer();
+            timer1.CompleteAction = () =>
+            {
+                if (_TrailEffect != null)
+                {
+                    _TrailEffect.enabled = false;
+                }
+                TimerMgr.Instance.ReturnTimer(timer1);
+
+                Timer timer2 = TimerMgr.Instance.GetTimer();
+                timer2.CompleteAction = () =>
+                {
+                    CachedTransform.position = new Vector3(100000, 100000, 100000);
+                    TimerMgr.Instance.ReturnTimer(timer2);
+                    Timer timer3 = TimerMgr.Instance.GetTimer();
+                    timer3.CompleteAction = () =>
+                    {
+                        MonoObjPool<ProjectileBase> pool = GlobalObjPools.Instance.GetProjectilePoolByType(_ProjectileType);
+                        _PreCalculated = false;
+                        if (pool == null)
+                        {
+#if UNITY_EDITOR
+                            throw new Exception("Pool not Initialize!!!");
+#endif
+                        }
+                        pool.Push(this);
+                        TimerMgr.Instance.ReturnTimer(timer3);
+                    };
+                    timer3.ResetTimer(0.05f);
+                    timer3.Start();
+                };
+                timer2.ResetTimer(0.05f);
+                timer2.Start();
+            };
+            timer1.ResetTimer(0.05f);
+            timer1.Start();
+        }
+
+        /*
         private IEnumerator OnDelayDispose()
         {
             // all delay here is to make sure trail renderer can render trail correctly
@@ -220,6 +277,7 @@ namespace Battle.Projectiles
 #endif
             pool.Push(this);
         }
+        */
 
         #region Pool Item Interfaces
         public void OnGet()

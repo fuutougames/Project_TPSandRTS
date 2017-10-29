@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
 using Battle.Guns;
@@ -9,19 +9,19 @@ using UnityEditor;
 [CanEditMultipleObjects]
 public class AssultRifleEditor : Editor
 {
-    public static float Accuracy;
-    public static float FireRate;
+    //public float Accuracy;
+    //public float FireRate;
 
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        Accuracy = EditorGUILayout.FloatField("Accuracy: ", Accuracy);
-        FireRate = EditorGUILayout.FloatField("FireRate: ", FireRate);
+        //Accuracy = EditorGUILayout.FloatField("Accuracy: ", Accuracy);
+        //FireRate = EditorGUILayout.FloatField("FireRate: ", FireRate);
         if (GUILayout.Button("SetGunBattleData"))
         {
             GunBattleData data = new GunBattleData();
-            data.Accuracy = Accuracy;
-            data.FireRate = FireRate;
+            data.Accuracy = ((AssultRifle) target).Accuracy;
+            data.FireRate = ((AssultRifle) target).FireRate;
             ((AssultRifle) target).Init(data);
         }
     }

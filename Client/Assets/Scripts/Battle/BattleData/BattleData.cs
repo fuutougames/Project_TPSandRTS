@@ -12,6 +12,19 @@ namespace Battle
         private Dictionary<int, Pawn> _PawnList;
         private Dictionary<int, ProjectileBase> _ActiveProjectiles;
         private List<TrapBase> _ActiveTraps;
+        private bool _FriendlyFire = false;
+        public bool FriendlyFire
+        {
+            get { return _FriendlyFire; }
+        }
+        private int m_MySide;
+        public int MySide
+        {
+            get
+            {
+                return m_MySide;
+            }
+        }
 
         #region API
         public void Reset(BattleDef.BATTLE_TYPE btype = BattleDef.BATTLE_TYPE.TYPE_1)
@@ -39,6 +52,9 @@ namespace Battle
             {
                 if (iter.Current.Value.Disposed)
                     continue;
+
+                if (!iter.Current.Value.PreCalculated)
+                    iter.Current.Value.PreCalculateOnFirstFrame();
 
                 _HitedPawnCnt = 0;
                 ProjectileBase projectile = iter.Current.Value;

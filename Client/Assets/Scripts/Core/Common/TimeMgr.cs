@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class TimeMgr : MonoSingleton<TimeMgr>
 {
@@ -15,7 +15,8 @@ public class TimeMgr : MonoSingleton<TimeMgr>
     // Get Current accumulate time of Time.deltaTime from game start up
     public float GetCurrentTime ()
     {
-        return (float)accumDeltaTime;
+        //return (float)accumDeltaTime;
+        return Time.realtimeSinceStartup;
     }
 
     public float GetDeltaTime ()

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,11 +7,12 @@ namespace Battle.Projectiles
 {
     public class ProjectileDmgLineNode
     {
-        public float TimeNode;
+        //public float TimeNode;
         public float RemainDamage;
         public StaticObstacleData Obstacle;
         public Vector3 TriggerPoint;
         public bool Triggred;
+        public float Distance;
         public BattleDef.PROJECTILE_HITTYPE HitType;
     }
 
@@ -72,30 +73,32 @@ namespace Battle.Projectiles
             _TimeClipLen = end - start;
         }
 
-        public void AddNode(float timeNode, float remainDamage,
+        public void AddNode(float remainDamage,
             StaticObstacleData obstacle, Vector3 triggerPoint, BattleDef.PROJECTILE_HITTYPE hitType)
         {
             if (_NodeIdx >= _Nodes.Count)
             {
                 ProjectileDmgLineNode node = new ProjectileDmgLineNode()
                 {
-                    TimeNode = timeNode,
+                    //TimeNode = timeNode,
                     RemainDamage = remainDamage,
                     Obstacle = obstacle,
                     TriggerPoint = triggerPoint,
                     Triggred = false,
-                    HitType = hitType
+                    Distance = Vector3.Distance(triggerPoint, _StartPos),
+                    HitType = hitType,
                 };
                 _Nodes.Add(node);
             }
             else
             {
                 ProjectileDmgLineNode node = _Nodes[_NodeIdx];
-                node.TimeNode = timeNode;
+                //node.TimeNode = timeNode;
                 node.RemainDamage = remainDamage;
                 node.Obstacle = obstacle;
                 node.TriggerPoint = triggerPoint;
                 node.Triggred = false;
+                node.Distance = Vector3.Distance(triggerPoint, _StartPos);
                 node.HitType = hitType;
             }
             ++_NodeIdx;
@@ -106,14 +109,25 @@ namespace Battle.Projectiles
             _NodeIdx = 0;
         }
 
-        public int GetPassedIdxByTime(float time)
+        //public int GetPassedIdxByTime(float time)
+        //{
+        //    for (int i = 0; i < _NodeIdx - 1; ++i)
+        //    {
+        //        if (time >= (_Nodes[i].TimeNode - .0001f) && time < _Nodes[i + 1].TimeNode)
+        //            return i;
+        //    }
+        //    return _NodeIdx - 1;
+        //}
+
+        public int GetPassedIdxByCurMagnitude(float magnitude)
         {
             for (int i = 0; i < _NodeIdx - 1; ++i)
             {
-                if (time > _Nodes[i].TimeNode && time < _Nodes[i + 1].TimeNode)
+                if (magnitude >= (_Nodes[i].Distance - .001f) && magnitude < (_Nodes[i + 1].Distance - .001f))
                     return i;
             }
             return _NodeIdx - 1;
+
         }
 
         /// <summary>
@@ -123,7 +137,7 @@ namespace Battle.Projectiles
         /// <returns></returns>
         public Vector3 GetPositionByTime(float time)
         {
-            float val = (time - _StartTime)/_TimeClipLen;
+            float val = (time - _StartTime) / _TimeClipLen;
             return Vector3.Lerp(_StartPos, _EndPos, val);
         }
 
@@ -132,9 +146,14 @@ namespace Battle.Projectiles
         /// </summary>
         /// <param name="time">input TimeMgr.GetCurrentTime() here</param>
         /// <returns></returns>
-        public float GetRemainDmgByTime(float time)
+        //public float GetRemainDmgByTime(float time)
+        //{
+        //    return _Nodes[GetPassedIdxByTime(time)].RemainDamage;
+        //}
+        public float GetRemainDmgByCurMagnitude(float magnitude)
         {
-            return _Nodes[GetPassedIdxByTime(time)].RemainDamage;
+            int idx = GetPassedIdxByCurMagnitude(magnitude);
+            return _Nodes[GetPassedIdxByCurMagnitude(magnitude)].RemainDamage;
         }
 
         /// <summary>
@@ -143,9 +162,9 @@ namespace Battle.Projectiles
         /// <param name="time">input TimeMgr.Instance.GetCurrentTime()</param>
         /// <param name="dmgLost"></param>
         /// <returns>last hit point after update</returns>
-        public Vector3 UpdateDmgLine(float time, float dmgLost)
+        public Vector3 UpdateDmgLine(float magnitude, float dmgLost)
         {
-            int idx = GetPassedIdxByTime(time);
+            int idx = GetPassedIdxByCurMagnitude(magnitude);
             Vector3 retPos = _Nodes[_NodeIdx - 1].TriggerPoint;
             if (idx >= NodeCount)
                 return retPos;
