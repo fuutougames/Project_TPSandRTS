@@ -1,4 +1,4 @@
-﻿
+
 using System.Collections.Generic;
 
 namespace Battle
@@ -14,8 +14,9 @@ namespace Battle
 
         public enum DAMAGE_TYPE
         {
-            BULLET_PENETRATE = 1,
-            EXPLOSIVE = 2
+            BULLET_IMPACT = 1,
+            BULLET_PENETRATE = 2,
+            EXPLOSIVE = 3
         }
 
         public enum PROJECTILE_TYPE

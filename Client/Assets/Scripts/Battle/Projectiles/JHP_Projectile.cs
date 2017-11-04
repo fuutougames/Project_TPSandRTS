@@ -51,7 +51,10 @@ namespace Battle.Projectiles
                 float distance = hitData[0].HitDistance;
                 float remainDmg = _DmgLine.GetRemainDmgByCurMagnitude(distance);
                 float damageMake = CalculateDamage(hitData[0], remainDmg);
-                hitData[0].APawn.TakeDamage(damageMake, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
+                if (hitData[0].APawn.Data.Armor < _PBData.Penetration)
+                    hitData[0].APawn.TakeDamage(damageMake, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE, hitData[0].HitPoints);
+                else
+                    hitData[0].APawn.TakeDamage(damageMake, BattleDef.DAMAGE_TYPE.BULLET_IMPACT, hitData[0].HitPoints);
                 RealRange = Vector3.Distance(_SyncStartPos, hitData[0].HitPoints[0]);
             }
             return true;

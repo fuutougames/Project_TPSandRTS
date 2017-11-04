@@ -12,7 +12,12 @@ namespace Battle.Projectiles
 
         public float CalculateDamage(PawnHitData hitData, float remainDmg)
         {
-            float dmg = hitData.PenetrationLen * BattleConst.AP_PAWN_PENETRATE_DMG_WEIGHT * remainDmg;
+            float dmg;
+            if (hitData.APawn.Data.Armor < _PBData.Penetration)
+                dmg = hitData.PenetrationLen * BattleConst.AP_PAWN_PENETRATE_DMG_WEIGHT * remainDmg;
+            else
+                dmg = remainDmg * BattleConst.AP_NOT_PENETRATE_DMG_WEIGHT;
+
             return dmg;
         }
 
@@ -27,9 +32,10 @@ namespace Battle.Projectiles
             // if not penetrate
             if (_PBData.Penetration < hitData[0].APawn.Data.Armor)
             {
-                float damage = _DmgLine.GetRemainDmgByCurMagnitude(hitData[0].HitDistance) * BattleConst.AP_NOT_PENETRATE_DMG_WEIGHT;
+                float damage = _DmgLine.GetRemainDmgByCurMagnitude(hitData[0].HitDistance);
+                damage = CalculateDamage(hitData[0], damage);
                 RealRange = hitData[0].HitDistance;
-                hitData[0].APawn.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
+                hitData[0].APawn.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_IMPACT, hitData[0].HitPoints);
                 return true;
             }
 
@@ -64,7 +70,7 @@ namespace Battle.Projectiles
                 }
 
                 //if (isServer)
-                hitData[i].APawn.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
+                hitData[i].APawn.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE, hitData[i].HitPoints);
 
                 if (remainDmg <= 0)
                 {

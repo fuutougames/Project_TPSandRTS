@@ -38,24 +38,9 @@ namespace Battle.Data
         /// </summary>
         /// <param name="dmg">damage taken</param>
         /// <param name="dmgType">damage type</param>
-        public void TakeDamage(float dmg, BattleDef.DAMAGE_TYPE dmgType)
+        public void TakeDamage(float dmg, BattleDef.DAMAGE_TYPE dmgType, Vector3[] hitPoints)
         {
-#if _DEBUG
-            //Debug.Log("Damage Taken!!!");
-#endif
-
             Debug.Log("Taking Dmg: " + dmg);
-            //if (!isServer)
-            //return;
-
-            //float hp = m_RuntimeData.HP - dmg;
-            //if (hp < 0)
-            //{
-            //    hp = 0;
-            //    //_SyncIsDead = true;
-            //}
-            //m_RuntimeData.HP = hp;
-            //Debug.Log("Damage taken!!!");
         }
 
 
