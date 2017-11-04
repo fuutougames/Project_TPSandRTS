@@ -2,11 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Common;
+using Network;
 
 namespace Battle.Data
 {
     public class PawnData 
     {
+        private int _PawnID;
+        public int PawnID { get { return _PawnID; } }
+
+        #region Static Data
         private Dictionary<CommEnum.PAWN_ATTRIBS, float> _AttribMap = new Dictionary<CommEnum.PAWN_ATTRIBS, float>(8);
         private List<int> _EquipList = new List<int>();
         private List<int> _WeaponList = new List<int>();
@@ -19,23 +24,60 @@ namespace Battle.Data
         }
 
         private Dictionary<int, float> _ExpMap = new Dictionary<int, float>();
+        #endregion
 
 
 
-        /*[SyncVar(hook = "OnHPChanged")]*/
+        #region Dynamic Data
         private float _SyncHP;
-        /*[SyncVar(hook = "OnMoveSpdChanged")]*/
         private float _SyncMoveSpd;
-        /*[SyncVar(hook = "OnArmorChanged")]*/
+        private int _SyncSide;
         private float _SyncArmor;
 
         #region Getters and Setters
-        //public NetworkInstanceId PawnId { get { return Identity.netId; } }
-        public float HP { get { return _SyncHP; } set { _SyncHP = value; } }
-        public float MoveSpd { get { return _SyncMoveSpd; } set { _SyncMoveSpd = value; } }
-        public float Armor { get { return _SyncArmor; } set { _SyncArmor = value; } }
-        #endregion
+        public float HP { get { return _SyncHP; } set { _SyncHP = OnHpChange(value); } }
+        public float MoveSpd { get { return _SyncMoveSpd; } set { _SyncMoveSpd = OnMoveSpdChange(value); } }
+        public float Armor { get { return _SyncArmor; } set { _SyncArmor = OnArmorChange(value); } }
+        public int Side { get { return _SyncSide; } set { _SyncSide = OnSideChange(value); } }
 
-        //[Server]
+
+        private float OnHpChange(float newVal)
+        {
+            if (NetworkMgr.Instance.TerminalType == Terminal.TERMINAL_TYPE.SERVER)
+            {
+                return newVal;
+            }
+            return HP;
+        }
+
+        private float OnMoveSpdChange(float newVal)
+        {
+            if (NetworkMgr.Instance.TerminalType == Terminal.TERMINAL_TYPE.SERVER)
+            {
+                return newVal;
+            }
+            return MoveSpd;
+        }
+
+        private float OnArmorChange(float newVal)
+        {
+            if (NetworkMgr.Instance.TerminalType == Terminal.TERMINAL_TYPE.SERVER)
+            {
+                return newVal;
+            }
+            return Armor;
+        }
+
+        private int OnSideChange(int newVal)
+        {
+            if (NetworkMgr.Instance.TerminalType == Terminal.TERMINAL_TYPE.SERVER)
+            {
+                return newVal;
+            }
+            return Side;
+        }
+
+        #endregion
+        #endregion
     }
 }

@@ -89,7 +89,7 @@ namespace Battle.Guns
             // calculate it with angle instead of xy offset;
             int side = 0;
             if (_Owner != null)
-                side = _Owner.Side;
+                side = _Owner.Data.Side;
 
             projectile.TriggerProjectile(MuzzleTrans.position, direction, side);
             OnFire();

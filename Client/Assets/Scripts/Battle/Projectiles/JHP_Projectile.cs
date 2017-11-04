@@ -19,10 +19,10 @@ namespace Battle.Projectiles
         }
 
 
-        public override float CalculateDamage(PawnHitData hitData, float remainDmg)
+        public float CalculateDamage(PawnHitData hitData, float remainDmg)
         {
             // fire from friendly unit
-            if (hitData.APawn.Side == SyncSide && SyncSide != 0 && !BattleMgr.Instance.BData.FriendlyFire)
+            if (hitData.APawn.Data.Side == SyncSide && SyncSide != 0 && !BattleMgr.Instance.BData.FriendlyFire)
             {
                 return 0;
             }
@@ -38,7 +38,7 @@ namespace Battle.Projectiles
             {
                 // not penetrate
                 // make impact damage only
-                return remainDmg * .375f;
+                return remainDmg * BattleConst.JHP_NOT_PENETRATE_DMG_WEIGHT;
             }
         }
 
@@ -48,13 +48,9 @@ namespace Battle.Projectiles
             if (hitDataLen > 0)
             {
                 hitCnt = 1;
-                float distance = Vector3.Distance(hitData[0].HitPoints[0], _SyncStartPos);
+                float distance = hitData[0].HitDistance;
                 float remainDmg = _DmgLine.GetRemainDmgByCurMagnitude(distance);
                 float damageMake = CalculateDamage(hitData[0], remainDmg);
-                //if (Mathf.Abs(remainDmg - 0) < Mathf.Epsilon || Mathf.Abs(damageMake - 0) < Mathf.Epsilon)
-                //{
-                //    Debug.Log("");
-                //}
                 hitData[0].APawn.TakeDamage(damageMake, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
                 RealRange = Vector3.Distance(_SyncStartPos, hitData[0].HitPoints[0]);
             }

@@ -12,6 +12,9 @@ namespace Battle
         private Dictionary<int, Pawn> _PawnList;
         private Dictionary<int, ProjectileBase> _ActiveProjectiles;
         private List<TrapBase> _ActiveTraps;
+
+
+        #region Battle Setting
         private bool _FriendlyFire = false;
         public bool FriendlyFire
         {
@@ -25,6 +28,7 @@ namespace Battle
                 return m_MySide;
             }
         }
+        #endregion
 
         #region API
         public void Reset(BattleDef.BATTLE_TYPE btype = BattleDef.BATTLE_TYPE.TYPE_1)

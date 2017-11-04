@@ -7,40 +7,69 @@ namespace Battle.Projectiles
     {
         protected override float CalcDmgLost(StaticObstacleData obstacle, float penLen)
         {
-            return base.CalcDmgLost(obstacle, penLen);
+            return Mathf.Pow((obstacle.Hardness / _PBData.Penetration), penLen) - 1;
         }
 
-        public override float CalculateDamage(PawnHitData hitData, float remainDmg)
+        public float CalculateDamage(PawnHitData hitData, float remainDmg)
         {
-            return base.CalculateDamage(hitData, remainDmg);
+            float dmg = hitData.PenetrationLen * BattleConst.AP_PAWN_PENETRATE_DMG_WEIGHT * remainDmg;
+            return dmg;
         }
 
         public override bool ProcessHitData(List<PawnHitData> hitData, int hitDataLen, out int hitCnt)
         {
             hitCnt = 0;
+            if (hitDataLen == 0 || hitData.Count < hitDataLen)
+            {
+                return false;
+            }
+
+            // if not penetrate
+            if (_PBData.Penetration < hitData[0].APawn.Data.Armor)
+            {
+                float damage = _DmgLine.GetRemainDmgByCurMagnitude(hitData[0].HitDistance) * BattleConst.AP_NOT_PENETRATE_DMG_WEIGHT;
+                RealRange = hitData[0].HitDistance;
+                hitData[0].APawn.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
+                return true;
+            }
+
             float dmgLost = 0;
-            float remainDmg = _DmgLine.GetRemainDmgByCurMagnitude(CurrentMagnitude);
+            float remainDmg = _DmgLine.GetRemainDmgByCurMagnitude(hitData[0].HitDistance);
             for (int i = 0; i < hitDataLen; ++i)
             {
                 if (Mathf.Abs(hitData[i].HitDistance - float.MaxValue) <= Mathf.Epsilon)
                 {
                     break;
                 }
+
                 ++hitCnt;
 
                 // calculate damage to all hited characters;
-                float damage = 0;
+                float damage = CalculateDamage(hitData[i], remainDmg);
                 remainDmg -= damage;
+                // if remain dmg is smaller than 0, that means damage calculated is bigger than we want,
+                // then make damge back to the correct value;
                 if (remainDmg <= 0)
+                {
+                    // bullet stay inside target pawn
                     damage += remainDmg;
-                dmgLost += damage;
+                    dmgLost += damage;
+                    // damage multiply
+                    damage *= BattleConst.AP_PAWN_STAY_INSIDE_DMG_WEIGHT;
+                }
+                else
+                {
+                    // bullet penetrate target pawn
+                    dmgLost += damage;
+                }
 
                 //if (isServer)
                 hitData[i].APawn.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE);
 
                 if (remainDmg <= 0)
                 {
-                    RealRange = Vector3.Distance(hitData[i].HitPoints[0], _SyncStartPos);
+                    //RealRange = Vector3.Distance(hitData[i].HitPoints[0], _SyncStartPos);
+                    RealRange = hitData[i].HitDistance;
                     return true;
                 }
             }

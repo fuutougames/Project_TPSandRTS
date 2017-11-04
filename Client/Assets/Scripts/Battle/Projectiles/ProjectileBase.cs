@@ -155,10 +155,10 @@ namespace Battle.Projectiles
         #endregion
 
 
-        public virtual float CalculateDamage(PawnHitData hitData, float remaniDmg)
-        {
-            return 0;
-        }
+        //public virtual float CalculateDamage(PawnHitData hitData, float remaniDmg)
+        //{
+        //    return 0;
+        //}
 
         /// <summary>
         /// process hit data, like damage calculation, damage line update, etc...

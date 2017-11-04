@@ -7,6 +7,9 @@ namespace Battle.Data
     //[RequireComponent(typeof(PawnRuntimeData))]
     public class Pawn : MonoBase
     {
+        private int _PawnID;
+        public int PawnID { get { return _PawnID; } }
+
         //private PawnPreloadData m_PreloadData;
         //private PawnRuntimeData m_RuntimeData;
         private PawnData _PawnData
@@ -18,15 +21,6 @@ namespace Battle.Data
         {
             get { return _PawnData; }
         }
-        private int _Side;
-        public int Side
-        {
-            get
-            {
-                return _Side;
-            }
-        }
-
         private Collider _PCollider;
         public Collider PCollider
         {
