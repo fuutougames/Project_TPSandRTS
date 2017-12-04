@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using Battle.Data;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace Battle.Guns
 {
     using Projectiles;
 
-    public class GunBase : MonoBase
+    public class GunBase : MonoBase, WeaponInterface
     {
         [SerializeField] public Transform MuzzleTrans;
         [SerializeField] public List<Transform> AttachmentSlots;
@@ -47,7 +46,7 @@ namespace Battle.Guns
         /// <summary>
         /// server only value, not valid in client
         /// </summary>
-        public bool _IsFiring;
+        public bool _IsShooting;
         #endregion
 
 
@@ -60,7 +59,7 @@ namespace Battle.Guns
                 _FireInterval = 1.0f/data.FireRate;
         }
 
-        public virtual void OnFire()
+        public virtual void OnShoot()
         {
             
         }
@@ -69,7 +68,7 @@ namespace Battle.Guns
         /// single shot
         /// </summary>
         //[Server]
-        public void Fire()
+        public void Shoot()
         {
             //base.Fire();
             // if is server, fire
@@ -97,30 +96,9 @@ namespace Battle.Guns
                 side = _Owner.Data.Side;
 
             projectile.TriggerProjectile(MuzzleTrans.position, direction, side);
-            OnFire();
-
-            // if is client, request fire then
-            //RpcFireOnClient(MuzzleTrans.position, direction);
+            OnShoot();
         }
         
-        //[ClientRpc]
-        /// <summary>
-        /// TODO: Receive fire request from client
-        /// </summary>
-        /// <param name="firePos"></param>
-        /// <param name="fireDir"></param>
-        //private void RpcFireOnClient(Vector3 firePos, Vector3 fireDir)
-        //{
-        //    ProjectileBase projectile = CreateProjectile();
-        //    projectile.Init(_PBData);
-        //    int side = 0;
-        //    if (_Owner != null)
-        //        side = _Owner.Side;
-
-        //    projectile.TriggerProjectile(firePos, fireDir, side);
-        //    OnFire();
-        //}
-
         private ProjectileBase CreateProjectile()
         {
             // temporary projectile creation, there should be a better way to instantiate a projectile
@@ -141,12 +119,26 @@ namespace Battle.Guns
 
         }
 
+        /// <summary>
+        /// aim target
+        /// </summary>
+        /// <param name="target"></param>
+        public virtual void Aim(Vector3 target)
+        {
+
+        }
+
         protected override void OnFixedUpdate()
         {
-            if (_IsFiring)
+            if (_IsShooting)
             {
-                Fire();
+                Shoot();
             }
+        }
+
+        public void Attack()
+        {
+            throw new NotImplementedException();
         }
     }
 }
