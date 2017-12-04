@@ -13,7 +13,7 @@ namespace Battle.Projectiles
         public Vector3 TriggerPoint;
         public bool Triggred;
         public float Distance;
-        public BattleDef.PROJECTILE_HITTYPE HitType;
+        public PROJECTILE_HITTYPE HitType;
     }
 
 
@@ -74,7 +74,7 @@ namespace Battle.Projectiles
         }
 
         public void AddNode(float remainDamage,
-            StaticObstacleData obstacle, Vector3 triggerPoint, BattleDef.PROJECTILE_HITTYPE hitType)
+            StaticObstacleData obstacle, Vector3 triggerPoint, PROJECTILE_HITTYPE hitType)
         {
             if (_NodeIdx >= _Nodes.Count)
             {

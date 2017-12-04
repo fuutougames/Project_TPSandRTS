@@ -38,14 +38,14 @@ namespace Battle.Data
         /// </summary>
         /// <param name="dmg">damage taken</param>
         /// <param name="dmgType">damage type</param>
-        public void TakeDamage(float dmg, BattleDef.DAMAGE_TYPE dmgType, Vector3[] hitPoints)
+        public void TakeDamage(float dmg, DAMAGE_TYPE dmgType, PawnHitData hitData)
         {
             Debug.Log("Taking Dmg: " + dmg);
         }
 
 
         public virtual void OnProjectileCollide(ProjectileBase projectile, Vector3 hitPoint,
-                BattleDef.PROJECTILE_HITTYPE hitType, BattleDef.PROJECTILE_TYPE pType)
+                PROJECTILE_HITTYPE hitType, PROJECTILE_TYPE pType)
         {
             Debug.Log("Pawn Hit!!!");
         }

@@ -20,7 +20,7 @@ public class ProjectileTest : MonoBehaviour {
     {
         CachedTransform = transform;
         data = new ProjectileBattleData();
-        data.PType = BattleDef.PROJECTILE_TYPE.LINEAR;
+        data.PType = PROJECTILE_TYPE.JHP_PROJECTILE;
         data.BaseDamage = 100.0f;
         data.Velocity = Velocity;
         data.MaxRange = MaxRange;
@@ -64,7 +64,7 @@ public class ProjectileTest : MonoBehaviour {
         for (int i = 0; i < obstacles.Length; ++i)
         {
             obstacles[i].Initialize();
-            BattleMgr.Instance.SceneData.RegisterObstacle(obstacles[i]);
+            BattleMgr.Instance.BData.SceneData.RegisterObstacle(obstacles[i]);
         }
     }
 

@@ -8,7 +8,7 @@ namespace Battle
         public Pawn APawn;
         public Vector3[] HitPoints;
         public float PenetrationLen;
-        public BattleDef.PROJECTILE_HITTYPE HitType;
+        public PROJECTILE_HITTYPE HitType;
         public float HitDistance;
 
 

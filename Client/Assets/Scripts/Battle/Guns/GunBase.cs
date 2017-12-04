@@ -16,34 +16,39 @@ namespace Battle.Guns
         /// <summary>
         /// projectile template
         /// </summary>
-        [SerializeField] private BattleDef.PROJECTILE_TYPE _ProjectileType;
+        [SerializeField] private PROJECTILE_TYPE _ProjectileType;
 
-        private GunBattleData _GBData;
         private Pawn _Owner;
 
+        private GunBattleData _GBData;
+
+        #region Projectile Attributes
         private ProjectileBattleData _PBData = new ProjectileBattleData()
         {
             BaseDamage = 1000,
             MaxRange = 2000,
             Velocity = 300,
             Penetration = 100,
-            PType = BattleDef.PROJECTILE_TYPE.LINEAR
+            PType = PROJECTILE_TYPE.JHP_PROJECTILE
         };
+        #endregion
+
+        public int RemainRounds { get; private set; }
+
+        #region Fire Control Attributes
         /// <summary>
         /// 1 / _FireRate
         /// </summary>
         private float _FireInterval;
-
-
         private float _LastFireTime;
-
-        public int CurrentRounds { get; private set; }
-        public int TotalRounds { get; private set; }
+        private FIRE_MODE _FireMode;
+        private bool _Reloading = false;
 
         /// <summary>
         /// server only value, not valid in client
         /// </summary>
         public bool _IsFiring;
+        #endregion
 
 
         public virtual void Init(GunBattleData data)

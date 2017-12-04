@@ -39,9 +39,9 @@ namespace Battle.Projectiles
         #region Inner Var
         //private bool _IsFirstFrameIgnored = false;
         [SerializeField]
-        protected BattleDef.PROJECTILE_TYPE _ProjectileType;
+        protected PROJECTILE_TYPE _ProjectileType;
 
-        public BattleDef.PROJECTILE_TYPE ProjectileType
+        public PROJECTILE_TYPE ProjectileType
         {
             get { return _ProjectileType; }
         }
@@ -139,12 +139,12 @@ namespace Battle.Projectiles
         /// <param name="hitPoints"></param>
         /// <param name="penLen"></param>
         /// <returns></returns>
-        public virtual BattleDef.PROJECTILE_HITTYPE IsCollideWithPawn(float time, Pawn cBData,
+        public virtual PROJECTILE_HITTYPE IsCollideWithPawn(float time, Pawn cBData,
             out Vector3[] hitPoints, out float penLen)
         {
             hitPoints = null;
             penLen = .0f;
-            return BattleDef.PROJECTILE_HITTYPE.NONE;
+            return PROJECTILE_HITTYPE.NONE;
         }
 
         public virtual bool IsCollideWithDynamicObstacle(float time, DynamicObstacleData doData, out Vector3 hitPoint)
@@ -210,13 +210,13 @@ namespace Battle.Projectiles
                 {
                     _TrailEffect.enabled = false;
                 }
-                TimerMgr.Instance.ReturnTimer(timer1);
+                TimerMgr.Instance.ReturnTimer(ref timer1);
 
                 Timer timer2 = TimerMgr.Instance.GetTimer();
                 timer2.CompleteAction = () =>
                 {
                     CachedTransform.position = new Vector3(100000, 100000, 100000);
-                    TimerMgr.Instance.ReturnTimer(timer2);
+                    TimerMgr.Instance.ReturnTimer(ref timer2);
                     Timer timer3 = TimerMgr.Instance.GetTimer();
                     timer3.CompleteAction = () =>
                     {
@@ -229,55 +229,17 @@ namespace Battle.Projectiles
 #endif
                         }
                         pool.Push(this);
-                        TimerMgr.Instance.ReturnTimer(timer3);
+                        TimerMgr.Instance.ReturnTimer(ref timer3);
                     };
-                    timer3.ResetTimer(0.05f);
+                    timer3.Reset(0.05f);
                     timer3.Start();
                 };
-                timer2.ResetTimer(0.05f);
+                timer2.Reset(0.05f);
                 timer2.Start();
             };
-            timer1.ResetTimer(0.05f);
+            timer1.Reset(0.05f);
             timer1.Start();
         }
-
-        /*
-        private IEnumerator OnDelayDispose()
-        {
-            // all delay here is to make sure trail renderer can render trail correctly
-            int curframe = framecnt;
-            yield return new WaitUntil(() => framecnt >= curframe);
-            if (_TrailEffect != null)
-            {
-                _TrailEffect.enabled = false;
-            }
-#if UNITY_EDITOR
-            //Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Dispose on frame " + framecnt);
-#endif
-            yield return new WaitUntil(() => framecnt > curframe + 3);
-            // move it to a remote place, do not change it's active state
-            // Tecnically speaking, this should be done in OnRetrn function, but we need to return
-            // this projectile in next frame to make sure trail renderer won't be activated too early;
-            CachedTransform.position = new Vector3(100000, 100000, 100000);
-#if UNITY_EDITOR
-            //Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Move away on frame " + framecnt);
-#endif
-
-
-            yield return new WaitUntil(() => framecnt > curframe + 5);
-            MonoObjPool<ProjectileBase> pool = GlobalObjPools.Instance.GetProjectilePoolByType(_ProjectileType);
-            if (pool == null)
-            {
-#if UNITY_EDITOR
-                throw new Exception("Pool not Initialize!!!");
-#endif
-            }
-#if UNITY_EDITOR
-            //Debug.LogError("Instance: " + this.GetInstanceID() + " Delay Return on frame " + framecnt);
-#endif
-            pool.Push(this);
-        }
-        */
 
         #region Pool Item Interfaces
         public void OnGet()

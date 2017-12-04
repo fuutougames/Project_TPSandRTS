@@ -68,7 +68,7 @@ public class StaticObstacleData : MonoBase
     /// <param name="hitType"></param>
     /// <param name="pType"></param>
     public virtual void OnProjectileCollide(ProjectileBase projectile, Vector3 hitPoint,
-        BattleDef.PROJECTILE_HITTYPE hitType, BattleDef.PROJECTILE_TYPE pType)
+        PROJECTILE_HITTYPE hitType, PROJECTILE_TYPE pType)
     {
 
         Debug.Log("Static Obstacle Hit!!!");

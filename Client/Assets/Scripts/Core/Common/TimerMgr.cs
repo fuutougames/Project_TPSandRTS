@@ -29,8 +29,13 @@ public class TimerMgr : MonoSingleton<TimerMgr>
         return m_TimerPool.Pop();
     }
 
-    public void ReturnTimer(Timer timer)
+    public void ReturnTimer(ref Timer retTimer)
     {
+        if (retTimer == null)
+            return;
+
+        Timer timer = retTimer;
+        retTimer = null;
         if (m_TickingTimer.Contains(timer))
         {
             if (m_ReturnBuffer.Contains(timer))

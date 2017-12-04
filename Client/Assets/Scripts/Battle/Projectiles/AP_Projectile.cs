@@ -35,7 +35,7 @@ namespace Battle.Projectiles
                 float damage = _DmgLine.GetRemainDmgByCurMagnitude(hitData[0].HitDistance);
                 damage = CalculateDamage(hitData[0], damage);
                 RealRange = hitData[0].HitDistance;
-                hitData[0].APawn.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_IMPACT, hitData[0].HitPoints);
+                hitData[0].APawn.TakeDamage(damage, DAMAGE_TYPE.BULLET_IMPACT, hitData[0]);
                 return true;
             }
 
@@ -70,7 +70,7 @@ namespace Battle.Projectiles
                 }
 
                 //if (isServer)
-                hitData[i].APawn.TakeDamage(damage, BattleDef.DAMAGE_TYPE.BULLET_PENETRATE, hitData[i].HitPoints);
+                hitData[i].APawn.TakeDamage(damage, DAMAGE_TYPE.BULLET_PENETRATE, hitData[i]);
 
                 if (remainDmg <= 0)
                 {

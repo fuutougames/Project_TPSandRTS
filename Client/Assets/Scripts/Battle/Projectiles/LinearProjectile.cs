@@ -108,7 +108,7 @@ namespace Battle.Projectiles
                 RaycastHit hit = hits[i];
                 int instanceId = hit.transform.GetInstanceID();
                 //TODO:Setup Obstacle Data in BattleMgr
-                StaticObstacleData obstacle = BattleMgr.Instance.SceneData.GetObstacleDataByInstanceID(instanceId);
+                StaticObstacleData obstacle = BattleMgr.Instance.BData.SceneData.GetObstacleDataByInstanceID(instanceId);
                 // if not a stored obstacle, just break for now;
                 if (!obstacle)
                     break;
@@ -168,13 +168,13 @@ namespace Battle.Projectiles
                     _DmgLine.EndPos = _SyncStartPos + _SyncDirection*hit.distance;
                     _DmgLine.RealRange = RealRange;
                     _DmgLine.SetStartAndEndTime(projectileStartTime, timeNode);
-                    _DmgLine.AddNode(0, obstacle, hit.point, BattleDef.PROJECTILE_HITTYPE.IN);
+                    _DmgLine.AddNode(0, obstacle, hit.point, PROJECTILE_HITTYPE.IN);
                     projectileBlocked = true;
                     break;
                 }
-                _DmgLine.AddNode(dmgRemain, obstacle, hit.point, BattleDef.PROJECTILE_HITTYPE.IN);
+                _DmgLine.AddNode(dmgRemain, obstacle, hit.point, PROJECTILE_HITTYPE.IN);
                 _DmgLine.AddNode(dmgRemain, obstacle, targetPoint,
-                    BattleDef.PROJECTILE_HITTYPE.OUT);
+                    PROJECTILE_HITTYPE.OUT);
             }
 
             // if projectile is not blocked, it should stop at it's max range;
@@ -185,7 +185,7 @@ namespace Battle.Projectiles
                 _DmgLine.RealRange = _PBData.MaxRange;
                 float timeNode = projectileStartTime + _PBData.MaxRange / _PBData.Velocity;
                 _DmgLine.SetStartAndEndTime(projectileStartTime, timeNode);
-                _DmgLine.AddNode(dmgRemain, null, _DmgLine.EndPos, BattleDef.PROJECTILE_HITTYPE.IN);
+                _DmgLine.AddNode(dmgRemain, null, _DmgLine.EndPos, PROJECTILE_HITTYPE.IN);
             }
         }
 
@@ -216,7 +216,7 @@ namespace Battle.Projectiles
         /// <param name="hitPoint1">hit in point</param>
         /// <param name="hitPoint2">hit out point</param>
         /// <returns></returns>
-        protected BattleDef.PROJECTILE_HITTYPE IntersectWithCollider(Vector3 start, Vector3 end, 
+        protected PROJECTILE_HITTYPE IntersectWithCollider(Vector3 start, Vector3 end, 
             Collider collider, Transform capTrans,
             out Vector3 hitPoint1, out Vector3 hitPoint2)
         {
@@ -227,7 +227,7 @@ namespace Battle.Projectiles
             {
                 hitPoint1 = Vector3.zero;
                 hitPoint2 = Vector3.zero;
-                return BattleDef.PROJECTILE_HITTYPE.NONE;
+                return PROJECTILE_HITTYPE.NONE;
             }
             dir.Normalize();
             ray1.origin = start;
@@ -243,7 +243,7 @@ namespace Battle.Projectiles
                 {
                     hitPoint1 = Vector3.zero;
                     hitPoint2 = Vector3.zero;
-                    return BattleDef.PROJECTILE_HITTYPE.NONE;
+                    return PROJECTILE_HITTYPE.NONE;
                 }
             }
             else
@@ -257,16 +257,16 @@ namespace Battle.Projectiles
                 hitPoint2 = Vector3.zero;
 
             if (isHit && !isInverseHit)
-                return BattleDef.PROJECTILE_HITTYPE.IN;
+                return PROJECTILE_HITTYPE.IN;
             else if (!isHit && isInverseHit)
-                return BattleDef.PROJECTILE_HITTYPE.OUT;
+                return PROJECTILE_HITTYPE.OUT;
             else if (isHit && isInverseHit)
-                return BattleDef.PROJECTILE_HITTYPE.PENETRATE;
+                return PROJECTILE_HITTYPE.PENETRATE;
 
-            return BattleDef.PROJECTILE_HITTYPE.NONE;
+            return PROJECTILE_HITTYPE.NONE;
         }
 
-        public override BattleDef.PROJECTILE_HITTYPE IsCollideWithPawn(float time, Pawn cbData,
+        public override PROJECTILE_HITTYPE IsCollideWithPawn(float time, Pawn cbData,
             out Vector3[] hitPoints, out float penLen)
         {
             //base.IsCollideWithCharacter(time, cbData, out hitPoints);
@@ -277,21 +277,21 @@ namespace Battle.Projectiles
 
 
             Vector3 hitPoint1, hitPoint2;
-            BattleDef.PROJECTILE_HITTYPE hitType = IntersectWithCollider(projectilePos, projectilePosNext,
+            PROJECTILE_HITTYPE hitType = IntersectWithCollider(projectilePos, projectilePosNext,
                 cbData.PCollider, cbData.CachedTransform,
                 out hitPoint1, out hitPoint2);
-            if (hitType != BattleDef.PROJECTILE_HITTYPE.NONE)
+            if (hitType != PROJECTILE_HITTYPE.NONE)
             {
                 switch (hitType)
                 {
-                    case BattleDef.PROJECTILE_HITTYPE.IN:
+                    case PROJECTILE_HITTYPE.IN:
                         hitPoints = new Vector3[] {hitPoint1};
                         penLen = (hitPoint2 - hitPoint1).magnitude;
                         break;
-                    case BattleDef.PROJECTILE_HITTYPE.OUT:
+                    case PROJECTILE_HITTYPE.OUT:
                         hitPoints = new Vector3[] {hitPoint2};
                         break;
-                    case BattleDef.PROJECTILE_HITTYPE.PENETRATE:
+                    case PROJECTILE_HITTYPE.PENETRATE:
                         hitPoints = new Vector3[] {hitPoint1, hitPoint2};
                         penLen = (hitPoint2 - hitPoint1).magnitude;
                         break;

@@ -30,7 +30,7 @@ public class Timer
         m_PauseTime = .0f;
     }
 
-    public void ResetTimer(float time, float interval = .0001f)
+    public void Reset(float time, float interval = .0001f)
     {
         m_Time = time;
         m_Interval = interval;

@@ -33,6 +33,7 @@ namespace Battle.Data
         private float _SyncMoveSpd;
         private int _SyncSide;
         private float _SyncArmor;
+        private Dictionary<int, int> _Ammo = new Dictionary<int, int>();
 
         #region Getters and Setters
         public float HP { get { return _SyncHP; } set { _SyncHP = OnHpChange(value); } }

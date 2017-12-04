@@ -8,11 +8,16 @@ namespace Battle
     using Projectiles;
     public class BattleData
     {
-        public BattleDef.BATTLE_TYPE BType;
+        //public BattleDef.BATTLE_TYPE BType;
+        private ICommission _MainCommission;
+        public BATTLE_STATE BState;
         private Dictionary<int, Pawn> _PawnList;
         private Dictionary<int, ProjectileBase> _ActiveProjectiles;
         private List<TrapBase> _ActiveTraps;
+        private Timer _BattleTimer;
 
+        private BattleSceneData _SceneData;
+        public BattleSceneData SceneData { get { return _SceneData; } }
 
         #region Battle Setting
         private bool _FriendlyFire = false;
@@ -31,12 +36,58 @@ namespace Battle
         #endregion
 
         #region API
-        public void Reset(BattleDef.BATTLE_TYPE btype = BattleDef.BATTLE_TYPE.TYPE_1)
+        public void NetworkInit()
         {
-            BType = btype;
+
+        }
+
+        public void Reset(ICommission mainCommission, float timeLimit = -1)
+        {
+            //BType = btype;
+            // start main loop by setting state as ONGOING
+            _MainCommission = mainCommission;
+            BState = BATTLE_STATE.ONGOING;
             _PawnList = new Dictionary<int, Pawn>();
             _ActiveProjectiles = new Dictionary<int, ProjectileBase>();
             _ActiveTraps = new List<TrapBase>();
+
+            if (SceneData == null)
+                _SceneData = new BattleSceneData();
+            SceneData.Reset();
+
+            if (timeLimit > 0)
+            {
+                _BattleTimer = TimerMgr.Instance.GetTimer();
+                _BattleTimer.Reset(timeLimit);
+                _BattleTimer.CompleteAction = OnBattleTimerEnd;
+                _BattleTimer.UpdateAction = OnBattleTimerUpdate;
+            }
+        }
+
+        public void EndBattle(ICommission mainCommission, bool commissionComplete)
+        {
+            BState = BATTLE_STATE.END;
+            // go back to base
+            // and do battle settlement
+        }
+
+        private void OnBattleTimerUpdate(float reaminTime)
+        {
+            // update timer text on ui
+        }
+
+        private void OnBattleTimerEnd()
+        {
+            if (_BattleTimer != null)
+                TimerMgr.Instance.ReturnTimer(ref _BattleTimer);
+            if (_MainCommission == null)
+            {
+                // do something maybe
+
+                return;
+            }
+
+            EndBattle(_MainCommission, _MainCommission.IsCommissionComplete());
         }
         #endregion
 
@@ -69,13 +120,13 @@ namespace Battle
                     Vector3[] hitPoints;
                     float penLen;
                     // if hit character
-                    BattleDef.PROJECTILE_HITTYPE hitType =
+                    PROJECTILE_HITTYPE hitType =
                         projectile.IsCollideWithPawn(TimeMgr.Instance.GetCurrentTime(), cIter.Current.Value,
                             out hitPoints, out penLen);
 
                     // hit data calculation
                     // data use for damage calculation and display hit effect
-                    if (hitType != BattleDef.PROJECTILE_HITTYPE.NONE)
+                    if (hitType != PROJECTILE_HITTYPE.NONE)
                     {
                         //collideOccur = true;
                         PawnHitData cHitData;
@@ -125,11 +176,11 @@ namespace Battle
                 for (int i = 0; i < hitCnt; ++i)
                 {
                     PawnHitData data = _HitedPawnList[i];
-                    if (data.HitType == BattleDef.PROJECTILE_HITTYPE.PENETRATE)
+                    if (data.HitType == PROJECTILE_HITTYPE.PENETRATE)
                     {
-                        data.APawn.OnProjectileCollide(projectile, data.HitPoints[0], BattleDef.PROJECTILE_HITTYPE.IN, 
+                        data.APawn.OnProjectileCollide(projectile, data.HitPoints[0], PROJECTILE_HITTYPE.IN, 
                             projectile.ProjectileType);
-                        data.APawn.OnProjectileCollide(projectile, data.HitPoints[1], BattleDef.PROJECTILE_HITTYPE.OUT,
+                        data.APawn.OnProjectileCollide(projectile, data.HitPoints[1], PROJECTILE_HITTYPE.OUT,
                             projectile.ProjectileType);
                     }
                     else
@@ -204,6 +255,43 @@ namespace Battle
         public void UnRegisterPawn(int instanceId)
         {
             _PawnList.Remove(instanceId);
+        }
+        #endregion
+
+        #region Commission
+        //public void RegisterMainCommission(ICommission commission)
+        //{
+        //    _MainCommission = commission;
+        //}
+
+        public void UpdateCommission()
+        {
+            if (_MainCommission == null)
+                return;
+
+            if (_MainCommission.IsCommissionComplete())
+            {
+                _MainCommission.OnCommissionComplete();
+                // end battle
+                EndBattle(_MainCommission, true);
+            }
+
+        }
+        #endregion
+
+
+        #region Update
+        public void Update()
+        {
+            if (BState != BATTLE_STATE.ONGOING)
+                return;
+
+            // is player controlled character all dead
+
+            // is commission finished
+            UpdateCommission();
+
+            UpdateProjectiles();
         }
         #endregion
     }
