@@ -32,7 +32,9 @@ namespace Battle.Guns
         };
         #endregion
 
+        #region Mag Data
         public int RemainRounds { get; private set; }
+        #endregion
 
         #region Fire Control Attributes
         /// <summary>
@@ -40,13 +42,15 @@ namespace Battle.Guns
         /// </summary>
         private float _FireInterval;
         private float _LastFireTime;
+        private int _BurstCount;
+        //private int _ShotsRemainingInBurst;
         private FIRE_MODE _FireMode;
         private bool _Reloading = false;
 
         /// <summary>
         /// server only value, not valid in client
         /// </summary>
-        public bool _IsShooting;
+        public bool _IsAttacking;
         #endregion
 
 
@@ -65,20 +69,13 @@ namespace Battle.Guns
         }
 
         /// <summary>
-        /// single shot
+        /// single basic shot
         /// </summary>
-        //[Server]
-        public void Shoot()
+        public void BasicFire()
         {
-            //base.Fire();
-            // if is server, fire
-            float now = TimeMgr.Instance.GetCurrentTime();
-            if (now - _LastFireTime < _FireInterval)
-                return;
-
-            _LastFireTime = now;
-            // fire
             // TODO: Calculate maxOffset by accuracy value
+            --RemainRounds;
+            _LastFireTime = TimeMgr.Instance.GetCurrentTime();
             float maxOffset = (float)2*1/_GBData.Accuracy;
             float offset = maxOffset * (float)GlobalInstances.Instance.RndIns.norm();
             float maxHalfOffsetAngle = 45;
@@ -119,6 +116,11 @@ namespace Battle.Guns
 
         }
 
+        public virtual void SetFireMode(FIRE_MODE fireMode)
+        {
+            _FireMode = fireMode;
+        }
+
         /// <summary>
         /// aim target
         /// </summary>
@@ -130,15 +132,123 @@ namespace Battle.Guns
 
         protected override void OnFixedUpdate()
         {
-            if (_IsShooting)
+            Attack();
+        }
+
+        private void AutoFire()
+        {
+            float now = TimeMgr.Instance.GetCurrentTime();
+            if (now - _LastFireTime < _FireInterval)
+                return;
+
+            BasicFire();
+        }
+
+        private bool _Bursting = false;
+        private bool _BurstComplete = true;
+        private int _LastBurstCount = 0;
+        private void BurstFire()
+        {
+            //if (_Bursting)
+            //    return;
+
+            float now = TimeMgr.Instance.GetCurrentTime();
+            if (now - _LastFireTime < _FireInterval * _LastBurstCount)
+                return;
+
+            int shotsRemainingInBurst = RemainRounds - _BurstCount > 0 ? _BurstCount : RemainRounds;
+            _LastBurstCount = shotsRemainingInBurst;
+
+            _Bursting = true;
+            _BurstComplete = false;
+            Timer timer = TimerMgr.Instance.GetTimer();
+            timer.CompleteAction = () =>
             {
-                Shoot();
+                // in case the final round is not being shot at the update action
+                if (shotsRemainingInBurst > 0)
+                {
+                    BasicFire();
+                    --shotsRemainingInBurst;
+                }
+                _BurstComplete = true;
+                TimerMgr.Instance.ReturnTimer(ref timer);
+            };
+            timer.UpdateAction = (remainTime) =>
+            {
+                if (remainTime < _FireInterval * shotsRemainingInBurst)
+                {
+                    BasicFire();
+                    --shotsRemainingInBurst;
+                }
+            };
+            timer.Reset(_FireInterval * shotsRemainingInBurst);
+            timer.Start();
+            BasicFire();
+            --shotsRemainingInBurst;
+        }
+
+        private bool _SingleShooting = false;
+        private void SingleFire()
+        {
+            //if (!_SingleShooting)
+            //    return;
+
+            _SingleShooting = true;
+            float now = TimeMgr.Instance.GetCurrentTime();
+            if (now - _LastFireTime < _FireInterval)
+                return;
+
+            BasicFire();
+        }
+
+        protected void Attack()
+        {
+            if (!_IsAttacking)
+                return;
+            if (_SingleShooting)
+                return;
+            if (_Bursting)
+                return;
+            if (!_BurstComplete)
+                return;
+
+            if (RemainRounds <= 0)
+            {
+                // do something maybe
+                return;
+            }
+
+            switch (_FireMode)
+            {
+
+                case FIRE_MODE.AUTO:
+                    AutoFire();
+                    break;
+                case FIRE_MODE.BURST:
+                    BurstFire();
+                    break;
+                case FIRE_MODE.SINGLE:
+                    SingleFire();
+                    break;
             }
         }
 
-        public void Attack()
+        /// <summary>
+        /// switch weapon state into attack
+        /// </summary>
+        public void StartAttack()
         {
-            throw new NotImplementedException();
+            _IsAttacking = true;
+        }
+
+        /// <summary>
+        /// switch weapon state into normal
+        /// </summary>
+        public void CancelAttack()
+        {
+            _IsAttacking = false;
+            _SingleShooting = false;
+            _Bursting = false;
         }
     }
 }

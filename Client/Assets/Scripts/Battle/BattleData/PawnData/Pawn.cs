@@ -55,10 +55,16 @@ namespace Battle.Data
         /// <summary>
         /// Only be called by server
         /// </summary>
-        public virtual void Attack()
+        public virtual void StartAttack()
         {
             if (_CurWeapon != null && !_SwitchingWeapon)
-                _CurWeapon.Attack();
+                _CurWeapon.StartAttack();
+        }
+
+        public virtual void CancelAttack()
+        {
+            if (_CurWeapon != null && !_SwitchingWeapon)
+                _CurWeapon.CancelAttack();
         }
 
 

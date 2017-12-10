@@ -3,6 +3,7 @@ namespace Battle
 {
     public interface WeaponInterface
     {
-        void Attack();
+        void StartAttack();
+        void CancelAttack();
     }
 }
