@@ -33,6 +33,8 @@ namespace Battle.Guns
         #endregion
 
         #region Mag Data
+
+        public int MagCapacity;
         public int RemainRounds { get; private set; }
         #endregion
 
@@ -42,7 +44,7 @@ namespace Battle.Guns
         /// </summary>
         private float _FireInterval;
         private float _LastFireTime;
-        private int _BurstCount;
+        private int _BurstCount = 3;
         //private int _ShotsRemainingInBurst;
         private FIRE_MODE _FireMode;
         private bool _Reloading = false;
@@ -113,7 +115,7 @@ namespace Battle.Guns
 
         public virtual void Reload()
         {
-
+            RemainRounds = MagCapacity;
         }
 
         public virtual void SetFireMode(FIRE_MODE fireMode)

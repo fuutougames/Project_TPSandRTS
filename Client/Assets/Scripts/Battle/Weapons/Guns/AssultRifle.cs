@@ -8,8 +8,9 @@ namespace Battle.Guns
     public class AssultRifle : GunBase
     {
 #if UNITY_EDITOR
-        public float Accuracy;
-        public float FireRate;
+        [SerializeField] public float Accuracy;
+        [SerializeField] public float FireRate;
+        [SerializeField] public FIRE_MODE FireMode;
 #endif
     }
 }

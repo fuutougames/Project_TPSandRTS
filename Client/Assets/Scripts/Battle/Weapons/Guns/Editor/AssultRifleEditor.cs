@@ -17,12 +17,19 @@ public class AssultRifleEditor : Editor
         base.OnInspectorGUI();
         //Accuracy = EditorGUILayout.FloatField("Accuracy: ", Accuracy);
         //FireRate = EditorGUILayout.FloatField("FireRate: ", FireRate);
+        AssultRifle ins = (AssultRifle) target;
         if (GUILayout.Button("SetGunBattleData"))
         {
             GunBattleData data = new GunBattleData();
-            data.Accuracy = ((AssultRifle) target).Accuracy;
-            data.FireRate = ((AssultRifle) target).FireRate;
-            ((AssultRifle) target).Init(data);
+            data.Accuracy = ins.Accuracy;
+            data.FireRate = ins.FireRate;
+            ins.SetFireMode(ins.FireMode);
+            ins.MagCapacity = 100;
+            ins.Init(data);
+        }
+        if (GUILayout.Button("Reload"))
+        {
+            ins.Reload();
         }
     }
 }
