@@ -17,6 +17,7 @@ public class Timer
     private float m_StartTime;
     private float m_LastUpdateTime;
     private float m_PauseTime = .0f;
+    private bool m_Stopped = true;
 
     public Timer()
     {
@@ -39,6 +40,9 @@ public class Timer
 
     public void Update()
     {
+        if (m_Stopped)
+            return;
+
         float realtimeFromStartup = TimeMgr.Instance.GetRealTimeFromeStartup();
         float timeDiff = realtimeFromStartup - m_LastUpdateTime;
         float remainTime = m_StartTime + m_PauseTime + m_Time - realtimeFromStartup;
@@ -47,6 +51,7 @@ public class Timer
         {
             if (UpdateAction != null)
             {
+                //Debug.Log("<color=blue>" + this.GetHashCode()+":"+ remainTime + "</color>");
                 UpdateAction(remainTime);
             }
             m_LastUpdateTime = realtimeFromStartup;
@@ -54,21 +59,20 @@ public class Timer
 
         if (remainTime <= .0f)
         {
-            if (CompleteAction != null)
-                CompleteAction.Invoke();
-
-            TimerMgr.Instance.UnregisterTimer(this);
+            Stop(true);
         }
     }
 
     public void Pause()
     {
+        m_Stopped = true;
         m_LastUpdateTime = TimeMgr.Instance.GetRealTimeFromeStartup();
         TimerMgr.Instance.UnregisterTimer(this);
     }
 
     public void Resume()
     {
+        m_Stopped = false;
         float realtimeFromStartup = TimeMgr.Instance.GetRealTimeFromeStartup();
         m_PauseTime += realtimeFromStartup - m_LastUpdateTime;
         TimerMgr.Instance.RegisterTimer(this);
@@ -79,11 +83,13 @@ public class Timer
         m_StartTime = TimeMgr.Instance.GetRealTimeFromeStartup();
         m_LastUpdateTime = m_StartTime;
         m_PauseTime = .0f;
+        m_Stopped = false;
         TimerMgr.Instance.RegisterTimer(this);
     }
 
     public void Stop(bool callComplete = true)
     {
+        m_Stopped = true;
         TimerMgr.Instance.UnregisterTimer(this);
         if (callComplete)
             if (CompleteAction != null)

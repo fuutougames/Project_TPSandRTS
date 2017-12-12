@@ -148,18 +148,22 @@ namespace Battle.Guns
 
         private bool _Bursting = false;
         private bool _BurstComplete = true;
-        private int _LastBurstCount = 0;
+        //private int _LastBurstCount = 0;
+        private int _ShotsRemainingInBurst = 0;
         private void BurstFire()
         {
             //if (_Bursting)
             //    return;
 
             float now = TimeMgr.Instance.GetCurrentTime();
-            if (now - _LastFireTime < _FireInterval * _LastBurstCount)
+            if (now - _LastFireTime < _FireInterval)
                 return;
 
-            int shotsRemainingInBurst = RemainRounds - _BurstCount > 0 ? _BurstCount : RemainRounds;
-            _LastBurstCount = shotsRemainingInBurst;
+            if (_ShotsRemainingInBurst > 0)
+                return;
+
+            _ShotsRemainingInBurst = RemainRounds - _BurstCount > 0 ? _BurstCount : RemainRounds;
+            //_LastBurstCount = _ShotsRemainingInBurst;
 
             _Bursting = true;
             _BurstComplete = false;
@@ -167,26 +171,26 @@ namespace Battle.Guns
             timer.CompleteAction = () =>
             {
                 // in case the final round is not being shot at the update action
-                if (shotsRemainingInBurst > 0)
+                if (_ShotsRemainingInBurst > 0)
                 {
                     BasicFire();
-                    --shotsRemainingInBurst;
+                    --_ShotsRemainingInBurst;
                 }
                 _BurstComplete = true;
                 TimerMgr.Instance.ReturnTimer(ref timer);
             };
             timer.UpdateAction = (remainTime) =>
             {
-                if (remainTime < _FireInterval * shotsRemainingInBurst)
+                if (remainTime < _FireInterval * _ShotsRemainingInBurst)
                 {
                     BasicFire();
-                    --shotsRemainingInBurst;
+                    --_ShotsRemainingInBurst;
                 }
             };
-            timer.Reset(_FireInterval * shotsRemainingInBurst);
+            timer.Reset(_FireInterval * _ShotsRemainingInBurst);
             timer.Start();
             BasicFire();
-            --shotsRemainingInBurst;
+            --_ShotsRemainingInBurst;
         }
 
         private bool _SingleShooting = false;

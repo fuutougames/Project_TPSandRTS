@@ -35,6 +35,8 @@ public class TimerMgr : MonoSingleton<TimerMgr>
             return;
 
         Timer timer = retTimer;
+        timer.UpdateAction = null;
+        timer.CompleteAction = null;
         retTimer = null;
         if (m_TickingTimer.Contains(timer))
         {
