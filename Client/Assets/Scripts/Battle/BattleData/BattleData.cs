@@ -6,10 +6,11 @@ using UnityEngine.Networking;
 namespace Battle
 {
     using Projectiles;
+    using ContractLogics;
     public class BattleData
     {
         //public BattleDef.BATTLE_TYPE BType;
-        private ICommission _MainCommission;
+        private ContractLogicBase _MainContract;
         public BATTLE_STATE BState;
         private Dictionary<int, Pawn> _PawnList;
         private Dictionary<int, ProjectileBase> _ActiveProjectiles;
@@ -41,11 +42,11 @@ namespace Battle
 
         }
 
-        public void Reset(ICommission mainCommission, float timeLimit = -1)
+        public void Reset(ContractLogicBase mainCommission, float timeLimit = -1)
         {
             //BType = btype;
             // start main loop by setting state as ONGOING
-            _MainCommission = mainCommission;
+            _MainContract = mainCommission;
             BState = BATTLE_STATE.ONGOING;
             _PawnList = new Dictionary<int, Pawn>();
             _ActiveProjectiles = new Dictionary<int, ProjectileBase>();
@@ -64,7 +65,7 @@ namespace Battle
             }
         }
 
-        public void EndBattle(ICommission mainCommission, bool commissionComplete)
+        public void EndBattle(ContractLogicBase mainCommission, bool commissionComplete)
         {
             BState = BATTLE_STATE.END;
             // go back to base
@@ -80,14 +81,14 @@ namespace Battle
         {
             if (_BattleTimer != null)
                 TimerMgr.Instance.ReturnTimer(ref _BattleTimer);
-            if (_MainCommission == null)
+            if (_MainContract == null)
             {
                 // do something maybe
 
                 return;
             }
 
-            EndBattle(_MainCommission, _MainCommission.IsCommissionComplete());
+            EndBattle(_MainContract, _MainContract.IsCommissionComplete());
         }
         #endregion
 
@@ -241,8 +242,6 @@ namespace Battle
         }
         #endregion
 
-
-
         #region Pawns
         public void RegisterPawn(Pawn cbData)
         {
@@ -258,27 +257,26 @@ namespace Battle
         }
         #endregion
 
-        #region Commission
+        #region Contracts
         //public void RegisterMainCommission(ICommission commission)
         //{
         //    _MainCommission = commission;
         //}
 
-        public void UpdateCommission()
+        public void UpdateContract()
         {
-            if (_MainCommission == null)
+            if (_MainContract == null)
                 return;
 
-            if (_MainCommission.IsCommissionComplete())
+            if (_MainContract.IsCommissionComplete())
             {
-                _MainCommission.OnCommissionComplete();
+                _MainContract.OnCommissionComplete();
                 // end battle
-                EndBattle(_MainCommission, true);
+                EndBattle(_MainContract, true);
             }
 
         }
         #endregion
-
 
         #region Update
         public void Update()
@@ -289,7 +287,7 @@ namespace Battle
             // is player controlled character all dead
 
             // is commission finished
-            UpdateCommission();
+            UpdateContract();
 
             UpdateProjectiles();
         }

@@ -30,7 +30,7 @@ namespace Battle.Data
         }
 
         protected bool _SwitchingWeapon = false;
-        protected WeaponInterface _CurWeapon = null;
+        protected IWeapon _CurWeapon = null;
 
         //[Server]
         /// <summary>

@@ -1,18 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using Common;
-using Data.DataMgr;
+using GameData;
 
-public class DataEntrance : Singleton<DataEntrance>
+public class Date : Singleton<Date>
 {
-    private List<DataMgrBase> _DataList;
+    #region Basic Functions
+    private List<DataModuleBase> _DataList;
 
-    public DataEntrance()
+    public Date()
     {
-        _DataList = new List<DataMgrBase>();
+        _DataList = new List<DataModuleBase>();
     }
 
-    public void AddData(DataMgrBase data)
+    public void AddData(DataModuleBase data)
     {
         _DataList.Add(data);
     }
@@ -34,4 +35,10 @@ public class DataEntrance : Singleton<DataEntrance>
             _DataList[i].DecodeData(data);
         }
     }
+    #endregion
+
+
+    #region Data Modules
+    public ContractData CommissionData = new ContractData();
+    #endregion
 }

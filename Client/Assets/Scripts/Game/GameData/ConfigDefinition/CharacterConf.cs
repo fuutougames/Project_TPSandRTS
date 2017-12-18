@@ -1,10 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Common;
 
 
-namespace Data.Config
+namespace ConfigData
 {
     [System.Serializable]
     public class RangeDict : SerializableDictionaryBase<CommEnum.PAWN_ATTRIBS, Vector2> { };

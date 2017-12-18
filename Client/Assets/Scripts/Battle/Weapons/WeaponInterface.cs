@@ -1,7 +1,7 @@
 
 namespace Battle
 {
-    public interface WeaponInterface
+    public interface IWeapon
     {
         void StartAttack();
         void CancelAttack();

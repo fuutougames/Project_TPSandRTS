@@ -1,15 +1,15 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Data.DataMgr
+namespace GameData
 {
-    public class DataMgrBase
+    public class DataModuleBase : IRecord
     {
-        public DataMgrBase()
+        public DataModuleBase()
         {
             Debug.Log("RuntimeDataBase constructor called!!!");
-            DataEntrance.Instance.AddData(this);
+            Date.Instance.AddData(this);
         }
 
         public virtual object EncodeData() { return null; }

@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Common;
 
-namespace Data.Config
+namespace ConfigData
 {
     [CreateAssetMenu(fileName = "BulletConf", menuName = "Config/BulletConf", order = 1)]
     public class BulletCfg : ScriptableObject

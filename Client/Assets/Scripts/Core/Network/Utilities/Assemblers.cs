@@ -20,6 +20,10 @@ namespace Network.Packets
                 Assembler_PACKET_CLIENT_CONN_RESPONSE
             },
             {
+                PacketID.PACKET_INFO_CONTRACT,
+                Assembler_PACKET_INFO_CONTRACT
+            },
+            {
                 PacketID.PACKET_TEST_PACKET,
                 Assembler_PACKET_TEST_PACKET
             },
@@ -40,6 +44,13 @@ namespace Network.Packets
         private static IPacket Assembler_PACKET_CLIENT_CONN_RESPONSE (ByteArray buffer)
         {
             PACKET_CLIENT_CONN_RESPONSE packet = new PACKET_CLIENT_CONN_RESPONSE();
+            packet.Read(buffer);
+            return packet;
+        }
+
+        private static IPacket Assembler_PACKET_INFO_CONTRACT (ByteArray buffer)
+        {
+            PACKET_INFO_CONTRACT packet = new PACKET_INFO_CONTRACT();
             packet.Read(buffer);
             return packet;
         }

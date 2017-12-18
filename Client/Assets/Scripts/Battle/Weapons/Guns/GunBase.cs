@@ -7,7 +7,7 @@ namespace Battle.Guns
 {
     using Projectiles;
 
-    public class GunBase : MonoBase, WeaponInterface
+    public class GunBase : MonoBase, IWeapon
     {
         [SerializeField] public Transform MuzzleTrans;
         [SerializeField] public List<Transform> AttachmentSlots;

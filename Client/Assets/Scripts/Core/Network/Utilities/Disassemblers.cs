@@ -20,6 +20,10 @@ namespace Network.Packets
                 Disassembler_PACKET_CLIENT_CONN_RESPONSE
             },
             {
+                PacketID.PACKET_INFO_CONTRACT,
+                Disassembler_PACKET_INFO_CONTRACT
+            },
+            {
                 PacketID.PACKET_TEST_PACKET,
                 Disassembler_PACKET_TEST_PACKET
             },
@@ -36,6 +40,11 @@ namespace Network.Packets
         }
 
         private static void Disassembler_PACKET_CLIENT_CONN_RESPONSE (IPacket packet, ref ByteArray buffer)
+        {
+            packet.Write(buffer);
+        }
+
+        private static void Disassembler_PACKET_INFO_CONTRACT (IPacket packet, ref ByteArray buffer)
         {
             packet.Write(buffer);
         }
