@@ -1,7 +1,16 @@
-﻿namespace Common
+namespace Common
 {
     public static class CommEnum
     {
+        public enum PROJECTILE_TYPE
+        {
+            //LINEAR = 1,
+            JHP_PROJECTILE = 2,
+            AP_PROJECTILE = 3,
+            MISSILE = 4,
+            SECTOR = 5,
+        }
+
         public enum BULLET_TYPE
         {
             //AP弹
@@ -59,6 +68,14 @@
         {
             HOST = 1,
             CLIENT = 2,
+        }
+
+        public enum CONTRACT_TARGET
+        {
+            ASSASINATE = 1,
+            DESTROY = 2,
+            RETREAT = 3,
+            ALL_RETREAT = 4,
         }
     }
 }

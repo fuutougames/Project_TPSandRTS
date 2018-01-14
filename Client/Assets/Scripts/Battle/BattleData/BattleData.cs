@@ -10,7 +10,7 @@ namespace Battle
     public class BattleData
     {
         //public BattleDef.BATTLE_TYPE BType;
-        private ContractLogicBase _MainContract;
+        //private ContractLogicBase _MainContract;
         public BATTLE_STATE BState;
         private Dictionary<int, Pawn> _PawnList;
         private Dictionary<int, ProjectileBase> _ActiveProjectiles;
@@ -42,11 +42,11 @@ namespace Battle
 
         }
 
-        public void Reset(ContractLogicBase mainCommission, float timeLimit = -1)
+        public void Reset(float timeLimit = -1)
         {
             //BType = btype;
             // start main loop by setting state as ONGOING
-            _MainContract = mainCommission;
+            //_MainContract = mainCommission;
             BState = BATTLE_STATE.ONGOING;
             _PawnList = new Dictionary<int, Pawn>();
             _ActiveProjectiles = new Dictionary<int, ProjectileBase>();
@@ -65,7 +65,7 @@ namespace Battle
             }
         }
 
-        public void EndBattle(ContractLogicBase mainCommission, bool commissionComplete)
+        public void EndBattle()
         {
             BState = BATTLE_STATE.END;
             // go back to base
@@ -81,14 +81,8 @@ namespace Battle
         {
             if (_BattleTimer != null)
                 TimerMgr.Instance.ReturnTimer(ref _BattleTimer);
-            if (_MainContract == null)
-            {
-                // do something maybe
 
-                return;
-            }
-
-            EndBattle(_MainContract, _MainContract.IsCommissionComplete());
+            EndBattle();
         }
         #endregion
 
@@ -245,36 +239,15 @@ namespace Battle
         #region Pawns
         public void RegisterPawn(Pawn cbData)
         {
-            if (_PawnList.ContainsKey(cbData.GetInstanceID()))
+            if (_PawnList.ContainsKey(cbData.PawnID))
                 return;
 
-            _PawnList.Add(cbData.GetInstanceID(), cbData);
+            _PawnList.Add(cbData.PawnID, cbData);
         }
 
-        public void UnRegisterPawn(int instanceId)
+        public void UnRegisterPawn(int pawnId)
         {
-            _PawnList.Remove(instanceId);
-        }
-        #endregion
-
-        #region Contracts
-        //public void RegisterMainCommission(ICommission commission)
-        //{
-        //    _MainCommission = commission;
-        //}
-
-        public void UpdateContract()
-        {
-            if (_MainContract == null)
-                return;
-
-            if (_MainContract.IsCommissionComplete())
-            {
-                _MainContract.OnCommissionComplete();
-                // end battle
-                EndBattle(_MainContract, true);
-            }
-
+            _PawnList.Remove(pawnId);
         }
         #endregion
 
@@ -286,8 +259,8 @@ namespace Battle
 
             // is player controlled character all dead
 
-            // is commission finished
-            UpdateContract();
+            // about contracts
+            // we decide to update contract via battle events instead of update it every frame
 
             UpdateProjectiles();
         }

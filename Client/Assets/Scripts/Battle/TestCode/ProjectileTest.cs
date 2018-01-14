@@ -4,6 +4,7 @@ using Battle;
 using Battle.Data;
 using Battle.Projectiles;
 using UnityEngine;
+using Common;
 
 public class ProjectileTest : MonoBehaviour {
     public Transform CachedTransform { get; private set; }
@@ -20,8 +21,8 @@ public class ProjectileTest : MonoBehaviour {
     {
         CachedTransform = transform;
         data = new ProjectileBattleData();
-        data.PType = PROJECTILE_TYPE.JHP_PROJECTILE;
-        data.BaseDamage = 100.0f;
+        data.PType = CommEnum.PROJECTILE_TYPE.JHP_PROJECTILE;
+        data.Damage = 100.0f;
         data.Velocity = Velocity;
         data.MaxRange = MaxRange;
         data.Penetration = Penetration;

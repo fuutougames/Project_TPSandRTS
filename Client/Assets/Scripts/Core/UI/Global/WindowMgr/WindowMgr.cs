@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Common;
 using GameEvents;
@@ -50,8 +50,8 @@ public partial class WindowMgr : Singleton<WindowMgr>
 
     public WindowMgr()
     {
-        Dispatcher.RegisterHandler(GameEvents.CommEvt.WINDOW_OPEN_EVENT, OnWindowOpen);
-        Dispatcher.RegisterHandler(GameEvents.CommEvt.WINDOW_CLOSE_EVENT, OnWindowClose);
+        Dispatcher.RegisterHandler(CommEvt.WINDOW_OPEN_EVENT, OnWindowOpen);
+        Dispatcher.RegisterHandler(CommEvt.WINDOW_CLOSE_EVENT, OnWindowClose);
     }
 
 
@@ -333,7 +333,6 @@ public partial class WindowMgr : Singleton<WindowMgr>
 
     #region Initialize
     private GameObject m_objRootCanvas;
-    private GameObject m_objUICam;
     private GameObject m_objEventSystem;
     private GameObject m_objWindowRoot;
 
@@ -341,9 +340,6 @@ public partial class WindowMgr : Singleton<WindowMgr>
     public RectTransform RootCanvasTrans { get { return m_transRootCanvas; } }
     private RectTransform m_transWindowRoot;
     public RectTransform WindowRootTrans { get { return m_transWindowRoot; } }
-
-    private Camera m_camUICam;
-    public Camera UICam { get { return m_camUICam; } }
 
     private Canvas m_compRootCanvas;
     public Canvas RootCanvas { get { return m_compRootCanvas; } }
@@ -374,14 +370,12 @@ public partial class WindowMgr : Singleton<WindowMgr>
         GameObject.DontDestroyOnLoad(uiSceneRoot);
         Transform uiSceneRootTrans = uiSceneRoot.transform;
         m_objRootCanvas = uiSceneRootTrans.Find("RootCanvas").gameObject;
-        m_objUICam = uiSceneRootTrans.Find("UICamera").gameObject;
         m_objEventSystem = uiSceneRootTrans.Find("RootCanvas/EventSystem").gameObject;
         m_objWindowRoot = uiSceneRootTrans.Find("RootCanvas/WindowRoot").gameObject;
 
         m_transRootCanvas = m_objRootCanvas.GetComponent<RectTransform>();
         m_transWindowRoot = m_objWindowRoot.GetComponent<RectTransform>();
 
-        m_camUICam = m_objUICam.GetComponent<Camera>();
 
         m_compRootCanvas = m_objRootCanvas.GetComponent<Canvas>();
         m_compRootCanvasScaler = m_objRootCanvas.GetComponent<CanvasScaler>();
@@ -392,6 +386,7 @@ public partial class WindowMgr : Singleton<WindowMgr>
 
         m_compTicker = m_objRootCanvas.GetComponent<Ticker>();
         m_compTicker.RegisterUpdateFunc(OnTryOpenBufferedWindow);
+
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)

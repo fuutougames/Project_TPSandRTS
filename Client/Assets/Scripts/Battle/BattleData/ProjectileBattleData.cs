@@ -1,12 +1,13 @@
 namespace Battle.Data
 {
+    using Common;
     public class ProjectileBattleData
     {
         /// <summary>
         /// Never used right now
         /// </summary>
-        public PROJECTILE_TYPE PType;
-        public float BaseDamage;
+        public CommEnum.PROJECTILE_TYPE PType;
+        public float Damage;
         public float Velocity;
         public float MaxRange;
         public float Penetration;

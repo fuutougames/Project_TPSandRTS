@@ -16,15 +16,6 @@ namespace Battle
         EXPLOSIVE = 3
     }
 
-    public enum PROJECTILE_TYPE
-    {
-        //LINEAR = 1,
-        JHP_PROJECTILE = 2,
-        AP_PROJECTILE = 3,
-        MISSILE = 4,
-        SECTOR = 5,
-    }
-
     public enum PROJECTILE_HITTYPE
     {
         NONE = -1,
@@ -38,6 +29,13 @@ namespace Battle
         AUTO,
         BURST,
         SINGLE
+    }
+
+    public enum GUN_TYPE
+    {
+        PISTOL,
+        ASSULT_RIFLE,
+        SNIPER_RIFLE,
     }
 
     //public enum BATTLE_TYPE

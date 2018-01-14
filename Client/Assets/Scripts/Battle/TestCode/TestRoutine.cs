@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Battle;
@@ -27,6 +27,7 @@ public class TestRoutine : MonoBehaviour
             BattleMgr.Instance.BData.RegisterPawn(characters[i]);
         }
 
+        Gun.Init();
 	}
 	
 	// Update is called once per frame
@@ -39,5 +40,10 @@ public class TestRoutine : MonoBehaviour
 	    {
 	        Gun.CancelAttack();
 	    }
+
+        if (Input.GetKey(KeyCode.R))
+        {
+            Gun.Reload();
+        }
 	}
 }

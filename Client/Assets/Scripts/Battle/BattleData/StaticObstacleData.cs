@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Battle;
 using Battle.Projectiles;
 using UnityEngine;
+using Common;
 
 /// <summary>
 /// static obstacle data
@@ -68,7 +69,7 @@ public class StaticObstacleData : MonoBase
     /// <param name="hitType"></param>
     /// <param name="pType"></param>
     public virtual void OnProjectileCollide(ProjectileBase projectile, Vector3 hitPoint,
-        PROJECTILE_HITTYPE hitType, PROJECTILE_TYPE pType)
+        PROJECTILE_HITTYPE hitType, CommEnum.PROJECTILE_TYPE pType)
     {
 
         Debug.Log("Static Obstacle Hit!!!");

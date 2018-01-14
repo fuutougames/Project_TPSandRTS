@@ -8,28 +8,56 @@ namespace GameData
     public class ContractData : DataModuleBase
     {
         /// <summary>
-        /// Commissions available
+        /// Contracts available on contract board
         /// </summary>
-        private List<ContractLogicBase> _Contracts;
-        public List<ContractLogicBase> Contracts { get { return _Contracts; } }
+        private List<ContractBase> _Contracts;
+        public List<ContractBase> Contracts { get { return _Contracts; } }
 
         /// <summary>
-        /// Commissions assigned
+        /// Contracts assigned
         /// </summary>
-        private List<ContractLogicBase> _CurrentContracts;
-        public List<ContractLogicBase> CurrentContracts { get { return _CurrentContracts; } }
+        private List<ContractBase> _CurrentContracts;
+        public List<ContractBase> CurrentContracts { get { return _CurrentContracts; } }
 
 
-        public ContractLogicBase ConstructCommissionFromNetwork(PACKET_INFO_CONTRACT data)
+        #region network related
+        public ContractBase ConstructContractFromNetwork(PACKET_INFO_CONTRACT data)
         {
-            ContractLogicBase contract = new ContractLogicBase();
+            ContractBase contract = new ContractBase(0);
             return contract;
         }
 
-        public PACKET_INFO_CONTRACT ConstructNetworkPacketFromCommission(ContractLogicBase contract)
+        public PACKET_INFO_CONTRACT ConstructNetworkPacketFromContract(ContractBase contract)
         {
             PACKET_INFO_CONTRACT packet = new PACKET_INFO_CONTRACT();
             return packet;
+        }
+        #endregion
+
+        /// <summary>
+        /// Refresh available contracts
+        /// </summary>
+        public void RefreshContracts()
+        {
+
+        }
+
+        /// <summary>
+        /// sign a contract
+        /// </summary>
+        /// <param name="uid"></param>
+        public void SignContract(int uid)
+        {
+
+        }
+
+        /// <summary>
+        /// complete a contract manually
+        /// </summary>
+        /// <param name="uid"></param>
+        public void CompleteContract(int uid)
+        {
+
         }
     }
 }
