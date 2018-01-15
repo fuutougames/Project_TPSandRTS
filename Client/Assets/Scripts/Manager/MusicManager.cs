@@ -32,11 +32,11 @@ public class MusicManager : MonoSingleton<MusicManager>
     {
         AudioClip clipToPlay = null;
 
-        if(sceneName == "Menu")
+        if(sceneName == "Menu" || sceneName == "Basement")
         {
             clipToPlay = menuTheme;
         }
-        else if(sceneName == "Game")
+        else if(sceneName == "Game3")
         {
             clipToPlay = mainTheme;
         }

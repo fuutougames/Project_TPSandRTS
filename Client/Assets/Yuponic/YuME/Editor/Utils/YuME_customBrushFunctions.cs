@@ -44,7 +44,9 @@ public class YuME_customBrushFunctions : EditorWindow
             Debug.Log("Files in folder: " + YuTools_Utils.numberOfFilesInFolder(YuME_mapEditor.availableTileSets[YuME_mapEditor.currentTileSetIndex].customBrushDestinationFolder, "*_YuME.prefab"));
 
             // Add the prefab to the project
-            tileParentObject.name = "CustomBrush" + YuTools_Utils.numberOfFilesInFolder(YuME_mapEditor.availableTileSets[YuME_mapEditor.currentTileSetIndex].customBrushDestinationFolder, "*_YuME.prefab") + "_YuME.prefab";
+            Guid.NewGuid().ToString("N");
+            //tileParentObject.name = "CustomBrush" + YuTools_Utils.numberOfFilesInFolder(YuME_mapEditor.availableTileSets[YuME_mapEditor.currentTileSetIndex].customBrushDestinationFolder, "*_YuME.prefab") + "_YuME.prefab";
+            tileParentObject.name = "CustomBrush" + Guid.NewGuid().ToString("N") + "_YuME.prefab";
             string destinationPath = YuTools_Utils.getAssetPath(YuME_mapEditor.availableTileSets[YuME_mapEditor.currentTileSetIndex]) + "CustomBrushes/";
             PrefabUtility.CreatePrefab(destinationPath + tileParentObject.name, tileParentObject);
 

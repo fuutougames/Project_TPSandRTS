@@ -85,6 +85,13 @@ public class YuME_editorConfig : EditorWindow
 
         EditorGUILayout.BeginVertical("box");
 
+        EditorGUILayout.LabelField("Centre Grid", EditorStyles.boldLabel);
+        editorData.centreGrid = EditorGUILayout.Toggle("Centre Grid", editorData.centreGrid);
+
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.BeginVertical("box");
+
         EditorGUILayout.LabelField("Global Scale Setting", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox("Warning. Changing the grid scale will have a knock on effect to all your maps. The default scale is 1. If you are seeing issues with your maps, please reset the scale.", MessageType.Warning);
         editorData.gridScaleFactor = EditorGUILayout.Slider("Grid Size", editorData.gridScaleFactor, 1f, 10f);
@@ -148,6 +155,7 @@ public class YuME_editorConfig : EditorWindow
 
         if (GUI.changed)
         {
+            EditorUtility.SetDirty(editorData);
             SceneView.RepaintAll();
         }
 

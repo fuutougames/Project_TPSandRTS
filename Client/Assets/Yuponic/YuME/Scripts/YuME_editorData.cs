@@ -33,4 +33,6 @@ public class YuME_editorData : ScriptableObject
     public float gridScaleFactor = 1f;
     public bool invertMouseWheel = false;
     public Vector3 initialOffset = Vector3.zero;
+    public bool twoPointFiveDMode = false;
+    public bool centreGrid = true;
 }

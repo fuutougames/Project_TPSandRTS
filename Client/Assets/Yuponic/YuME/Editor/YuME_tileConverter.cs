@@ -29,7 +29,6 @@ class YuME_tileConverter : EditorWindow
         editorData = ScriptableObject.CreateInstance<YuME_editorData>();
 
         string[] guids;
-
 		guids = AssetDatabase.FindAssets("YuME_editorSetupData");
 		editorData = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(YuME_editorData)) as YuME_editorData;
 

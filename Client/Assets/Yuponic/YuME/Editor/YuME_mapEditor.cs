@@ -5,11 +5,14 @@ using System.Collections.Generic;
 
 public class YuME_mapEditor : EditorWindow
 {
+    private static bool testGridDepth = true;
+
     // ----------------------------------------------------------------------------------------------------
     // ----- Editor Helpers and Settings
     // ----------------------------------------------------------------------------------------------------
 
     public static YuME_editorData editorData;
+    public static YuME_importerSettings userSettings;
     public static GameObject editorGameObject;
     public static GameObject tileMapParent;
     public static GameObject[] mapLayers = new GameObject[8];
@@ -45,6 +48,7 @@ public class YuME_mapEditor : EditorWindow
 
     public static float globalScale = 1f;
     static float _globalScale = 1f;
+    static int gridType = 0;
 
     public enum toolIcons
     {
@@ -58,11 +62,12 @@ public class YuME_mapEditor : EditorWindow
         gridUpTool,
         gridDownTool,
         rotateTool,
+        rotateXTool,
         flipVerticalTool,
         flipHorizontalTool,
         copyTool,
         moveTool,
-		customBrushTool,
+        customBrushTool,
         trashTool,
         isolateLayerTool,
         layerUp,
@@ -86,6 +91,8 @@ public class YuME_mapEditor : EditorWindow
     public static bool controlHeld = false;
     public static bool shiftHeld = false;
     public static bool altHeld = false;
+
+    public static bool randomRotationMode = false;
 
     public static List<GameObject> isolatedGridObjects = new List<GameObject>();
     public static bool isolateTiles = false;
@@ -124,6 +131,19 @@ public class YuME_mapEditor : EditorWindow
     public static GameObject currentTile;
     public static List<GameObject> tileChildObjects = new List<GameObject>();
 
+    // ----------------------------------------------------------------------------------------------------
+    // ----- ALT Tile Variables
+    // ----------------------------------------------------------------------------------------------------
+
+    public static bool useAltTiles = false;
+    public static List<s_AltTiles> altTiles = new List<s_AltTiles>();
+
+    public struct s_AltTiles
+    {
+        public string masterTile;
+        public GameObject[] altTileObjects;
+    }
+
     static int controlId;
 
     // ----------------------------------------------------------------------------------------------------
@@ -149,9 +169,11 @@ public class YuME_mapEditor : EditorWindow
         // ----------------------------------------------------------------------------------------------------
         // ----- Load Editor Settings
         // ----------------------------------------------------------------------------------------------------
-
         guids = AssetDatabase.FindAssets("YuME_editorSetupData");
         editorData = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(YuME_editorData)) as YuME_editorData;
+
+        guids = AssetDatabase.FindAssets("YuME_importSettings");
+        userSettings = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(YuME_importerSettings)) as YuME_importerSettings;
 
         globalScale = editorData.gridScaleFactor;
 
@@ -163,8 +185,18 @@ public class YuME_mapEditor : EditorWindow
 
         gridSceneObject = GameObject.Find("YuME_MapEditorObject");
 
+        if (editorData.twoPointFiveDMode == false)
+        {
+            gridType = 0;
+        }
+        else
+        {
+            gridType = 1;
+        }
+
         updateGridColors();
         updateGridScale();
+        updateGridType();
 
         gridHeight = 0;
 
@@ -244,6 +276,7 @@ public class YuME_mapEditor : EditorWindow
                     unFreezeMap();
                 }
             }
+            updateGridType();
             updateGridScale();
         }
     }
@@ -414,6 +447,28 @@ public class YuME_mapEditor : EditorWindow
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("box");
+
+        string[] gridLayout = new string[] { "Flat Grid", "2.5D Grid" };
+
+        gridType = GUILayout.SelectionGrid(
+            gridType,
+            gridLayout,
+            2,
+            EditorStyles.toolbarButton
+            );
+
+        if(gridType == 0)
+        {
+            editorData.twoPointFiveDMode = false;
+        }
+        else
+        {
+            editorData.twoPointFiveDMode = true;
+        }
+
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.BeginVertical("box");
         EditorGUILayout.BeginHorizontal();
 
         quantizedGridHeight = gridHeight / globalScale;
@@ -463,6 +518,8 @@ public class YuME_mapEditor : EditorWindow
         tilePreviewColumnWidth = EditorGUILayout.IntSlider(tilePreviewColumnWidth, 1, 10);
 
         EditorGUILayout.EndVertical();
+
+        useAltTiles = GUILayout.Toggle(useAltTiles, "Use ALT Tiles", "Button", GUILayout.Height(20));
 
         bool freezeMap = false;
         freezeMap = GUILayout.Toggle(freezeMap, "Freeze Map", "Button", GUILayout.Height(20));
@@ -589,6 +646,10 @@ public class YuME_mapEditor : EditorWindow
                     break;
                 case toolIcons.rotateTool:
                     tileRotation+=90f;
+                    selectedTool = previousSelectedTool;
+                    break;
+                case toolIcons.rotateXTool:
+                    tileRotationX += 90f;
                     selectedTool = previousSelectedTool;
                     break;
                 case toolIcons.flipHorizontalTool:
@@ -879,7 +940,25 @@ public class YuME_mapEditor : EditorWindow
             string path = YuTools_Utils.getAssetPath(availableTileSets[currentTileSetIndex]);
 
             currentTileSetObjects = YuTools_Utils.loadDirectoryContents(path, "*.prefab");
+
+            altTiles = new List<s_AltTiles>();
+
+            for (int i = 0; i < currentTileSetObjects.Length; i++)
+            {
+                if (AssetDatabase.IsValidFolder(path+ currentTileSetObjects[i].name))
+                {
+                    GameObject[] loadAltTiles = YuTools_Utils.loadDirectoryContents(path + currentTileSetObjects[i].name, "*.prefab");
+
+                    s_AltTiles newAltTiles;
+                    newAltTiles.masterTile = currentTileSetObjects[i].name;
+                    newAltTiles.altTileObjects = loadAltTiles;
+
+                    altTiles.Add(newAltTiles);
+                }
+            }
+
             currentTile = currentTileSetObjects[0];
+
         }
         catch
         {
@@ -925,22 +1004,25 @@ public class YuME_mapEditor : EditorWindow
                 {
                     if(currentTileSetObjects[i] != null)
                     {
-                        EditorGUILayout.BeginVertical();
+                        //if (!currentTileSetObjects[i].name.Contains(userSettings.altIdentifier))
+                        //{
+                            EditorGUILayout.BeginVertical();
 
-                        drawTileButtons(i);
-                        EditorGUILayout.BeginHorizontal("Box");
-                        EditorGUILayout.LabelField(currentTileSetObjects[i].name, GUILayout.MaxWidth(132));
-                        EditorGUILayout.EndHorizontal();
-                        EditorGUILayout.EndVertical();
-
-                        horizontalCounter++;
-
-                        if (horizontalCounter == tilePreviewColumnWidth)
-                        {
-                            horizontalCounter = 0;
+                            drawTileButtons(i);
+                            EditorGUILayout.BeginHorizontal("Box");
+                            EditorGUILayout.LabelField(currentTileSetObjects[i].name, GUILayout.MaxWidth(132));
                             EditorGUILayout.EndHorizontal();
-                            EditorGUILayout.BeginHorizontal();
-                        }
+                            EditorGUILayout.EndVertical();
+
+                            horizontalCounter++;
+
+                            if (horizontalCounter == tilePreviewColumnWidth)
+                            {
+                                horizontalCounter = 0;
+                                EditorGUILayout.EndHorizontal();
+                                EditorGUILayout.BeginHorizontal();
+                            }
+                        //}
                     }
                 }
             }
@@ -1119,17 +1201,36 @@ public class YuME_mapEditor : EditorWindow
         }
     }
 
+    static void updateGridType()
+    {
+        if (gridSceneObject == null)
+        {
+            gridSceneObject = GameObject.Find("YuME_MapEditorObject");
+        }
+        else
+        {
+                gridSceneObject.GetComponent<YuME_GizmoGrid>().twoPointFiveDMode = editorData.twoPointFiveDMode;
+                SceneView.RepaintAll();
+        }
+    }
+
     static void updateGridScale()
     {
-        if (gridSceneObject != null)
+        if (gridSceneObject == null)
         {
+            gridSceneObject = GameObject.Find("YuME_MapEditorObject");
+        }
+        else
+        { 
             try
             {
                 gridSceneObject.GetComponent<YuME_GizmoGrid>().tileSize = globalScale;
+                gridSceneObject.GetComponent<YuME_GizmoGrid>().centreGrid = editorData.centreGrid;
             }
             catch
             {
                 gridSceneObject.GetComponent<YuME_GizmoGrid>().tileSize = 1f;
+                gridSceneObject.GetComponent<YuME_GizmoGrid>().centreGrid = true;
             }
         }
 
@@ -1174,9 +1275,18 @@ public class YuME_mapEditor : EditorWindow
             shiftOffset.y = shiftOffset.y - (int)shiftOffset.y;
             shiftOffset.z = shiftOffset.z - (int)shiftOffset.z;
 
-            tilePosition.x = Mathf.Round(((hit.point.x + shiftOffset.x) - hit.normal.x * 0.001f) / globalScale) * globalScale - shiftOffset.x;
-            tilePosition.z = Mathf.Round(((hit.point.z + shiftOffset.z) - hit.normal.z * 0.001f) / globalScale) * globalScale - shiftOffset.z;
-            tilePosition.y = gridHeight + gridSceneObject.transform.position.y;
+            if (!editorData.twoPointFiveDMode)
+            {
+                tilePosition.x = Mathf.Round(((hit.point.x + shiftOffset.x) - hit.normal.x * 0.001f) / globalScale) * globalScale - shiftOffset.x;
+                tilePosition.z = Mathf.Round(((hit.point.z + shiftOffset.z) - hit.normal.z * 0.001f) / globalScale) * globalScale - shiftOffset.z;
+                tilePosition.y = gridHeight + gridSceneObject.transform.position.y;
+            }
+            else
+            {
+                tilePosition.x = Mathf.Round(((hit.point.x + shiftOffset.x) - hit.normal.x * 0.001f) / globalScale) * globalScale - shiftOffset.x;
+                tilePosition.y = Mathf.Round(((hit.point.y + shiftOffset.y) - hit.normal.y * 0.001f) / globalScale) * globalScale - shiftOffset.y;
+                tilePosition.z = gridHeight + gridSceneObject.transform.position.z;
+            }
         }
     }
 
@@ -1312,9 +1422,18 @@ public class YuME_mapEditor : EditorWindow
                 gridTemp.GetComponent<YuME_GizmoGrid>().gridWidth = (int)value.x;
                 gridTemp.GetComponent<YuME_GizmoGrid>().gridDepth = (int)value.y;
                 Vector3 tempGridSize;
-                tempGridSize.x = (int)value.x * globalScale;
-                tempGridSize.y = 0.1f;
-                tempGridSize.z = (int)value.y * globalScale;
+                if (!editorData.twoPointFiveDMode)
+                {
+                    tempGridSize.x = (int)value.x * globalScale;
+                    tempGridSize.y = 0.1f;
+                    tempGridSize.z = (int)value.y * globalScale;
+                }
+                else
+                {
+                    tempGridSize.x = (int)value.x * globalScale;
+                    tempGridSize.y = (int)value.y * globalScale;
+                    tempGridSize.z = 0.1f;
+                }
                 gridTemp.GetComponent<BoxCollider>().size = tempGridSize;
             }
         }
@@ -1401,14 +1520,18 @@ public class YuME_mapEditor : EditorWindow
         {
             _tileRotationX = value;
 
-            if(_tileRotationX >= 360)
+            if (_tileRotationX >= 360)
             {
                 _tileRotationX = 0f;
             }
-            else if(_tileRotationX < 0f)
+            else if (_tileRotationX < 0f)
             {
                 _tileRotationX = 270f;
             }
+
         }
     }
+
+
+    public static Vector3 tileScale = Vector3.one;
 }

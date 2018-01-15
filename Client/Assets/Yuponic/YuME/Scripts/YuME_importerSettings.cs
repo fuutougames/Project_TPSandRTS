@@ -13,6 +13,8 @@ public class YuME_importerSettings : ScriptableObject
     public int shadowCastingMode = 1;
     public bool receiveShadows = true;
 
+    public string altIdentifier = "_alt";
+
     public bool bypassCollisionSetup = false;
     public bool importCollision = true;
     public string collisionIdentifier = "_collision";

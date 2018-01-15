@@ -36,7 +36,8 @@ public class Menu : MonoBase
 
     public void Play()
     {
-        SceneManager.LoadScene("Game");
+        //SceneManager.LoadScene("Game");
+        SceneManager.LoadScene("Basement");
     }
 
     public void Quit()

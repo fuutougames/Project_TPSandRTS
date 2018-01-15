@@ -36,7 +36,7 @@ public class MapGenerator : MonoBase
         tilePrefab = ResourceManager.Instance.LoadResource<Transform>("Prefabs/Tile");
         obstaclePrefab = ResourceManager.Instance.LoadResource<Transform>("Prefabs/Obstacle");
         //FindObjectOfType<Spawner>().OnNewWave += OnNewWave;
-        GenerateMap();
+        //GenerateMap();
     }
 
     protected override void OnStart()
@@ -75,15 +75,18 @@ public class MapGenerator : MonoBase
         mapHolder.SetParent(this.transform);
 
         // Spawning tiles
+        MapTile mapTile = this.transform.Find("MapTile").GetComponent<MapTile>();
+        mapTile.BuildMesh();
+        mapTile.transform.position = CoordToPosition(0, currentMap.mapSize.y - 1) - new Vector3(tileSize * 0.5f, 0, -tileSize * 0.5f);
         for (int x = 0; x < currentMap.mapSize.x; x++)
         {
             for (int y = 0; y < currentMap.mapSize.y; y++)
             {
-                tilePosition = CoordToPosition(x, y);
-                Transform newTile = Instantiate(tilePrefab, tilePosition, Quaternion.Euler(Vector3.right * 90)) as Transform;
-                newTile.localScale = Vector3.one * (1 - outlinePercent) * tileSize;
-                newTile.SetParent(mapHolder);
-                tileMap[x, y] = newTile;
+                //tilePosition = CoordToPosition(x, y);
+                //Transform newTile = Instantiate(tilePrefab, tilePosition, Quaternion.Euler(Vector3.right * 90)) as Transform;
+                //newTile.localScale = Vector3.one * (1 - outlinePercent) * tileSize;
+                //newTile.SetParent(mapHolder);
+                //tileMap[x, y] = newTile;
             }
         }
 
@@ -186,6 +189,13 @@ public class MapGenerator : MonoBase
         return tileMap[randomCoord.x, randomCoord.y];
     }
 
+    public Vector3 GetRandomOpenPos()
+    {
+        Coord randomCoord = shuffledOpenTileCoords.Dequeue();
+        shuffledOpenTileCoords.Enqueue(randomCoord);
+        return CoordToPosition(randomCoord.x, randomCoord.y);
+    }
+
     private Dictionary<Vector2, List<Coord>> OpenTileCoordDic = new Dictionary<Vector2, List<Coord>>();
     public Transform GetRandomOpenTileFromRegion(Vector2 region, Vector2 regionSize)
     {
@@ -219,6 +229,24 @@ public class MapGenerator : MonoBase
         }
     }
 
+    private List<Vector3> tempRandPosList = new List<Vector3>();
+    public Vector3 GetRandomOpenPosFromeRegion(Vector3 centerPos, float radius)
+    {
+        tempRandPosList.Clear();
+        for (int i = 0; i < allOpenCoords.Count; i++)
+        {
+            Coord openCoord = allOpenCoords[i];
+            Vector3 coordPos = CoordToPosition(openCoord.x, openCoord.y);
+            float distance = Vector3.Distance(centerPos, coordPos);
+            if(distance > 5 && distance <= radius)
+            {
+                tempRandPosList.Add(coordPos);
+            }
+        }
+
+        return tempRandPosList[UnityEngine.Random.Range(0, tempRandPosList.Count)];
+    }
+
     public Vector2 CalRegionIndexFromPos(Vector3 position, Vector2 regionSize)
     {
         Transform tile = GetTileFromPosition(position);
@@ -236,9 +264,14 @@ public class MapGenerator : MonoBase
     public void GenerateRandomMap()
     {
         randomSeed = UnityEngine.Random.Range(0, 100);
-        maps[0] = Map.CreateRandom(randomSeed, new Coord() { x = 32, y = 32});
+        maps[0] = Map.CreateRandom(randomSeed, new Coord() { x = (int)maxMapSize.x, y = (int)maxMapSize.y});
         mapIndex = 0;
         GenerateMap();
+        if(currentMap == null)
+        {
+            Debug.Log("Currentmap = null");
+            return;
+        }
         Camera.main.GetComponent<GradientBackground>().UpdateBackground(currentMap.foregroundColor, currentMap.backgroundColor);
     }
     #endregion
@@ -355,8 +388,8 @@ public class MapGenerator : MonoBase
             randMap.seed = seed;
             randMap.mapSize = mapSize;
             System.Random prng = new System.Random(randMap.seed);
-            randMap.obstaclePercent = (float)prng.NextDouble();
-            randMap.minObstacleHeight = 1;
+            randMap.obstaclePercent = (float)(prng.NextDouble() * (0.4f - 0.2f) + 0.2f);
+            randMap.minObstacleHeight = 3f;
             randMap.maxObstacleHeight = 5;
             UnityEngine.Random.InitState(seed);
             randMap.foregroundColor = UnityEngine.Random.ColorHSV(0.5f, 1f);

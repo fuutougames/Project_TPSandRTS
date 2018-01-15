@@ -10,24 +10,52 @@ public class YuME_mouseShorcuts : EditorWindow
             mouseEvent.Use();
             if (!YuME_mapEditor.editorData.invertMouseWheel)
             {
-                if (Event.current.delta.y >= 0f)
+                if (!YuME_mapEditor.editorData.twoPointFiveDMode)
                 {
-                    YuME_mapEditor.gridHeight += YuME_mapEditor.globalScale;
+                    if (Event.current.delta.y >= 0f)
+                    {
+                        YuME_mapEditor.gridHeight += YuME_mapEditor.globalScale;
+                    }
+                    else
+                    {
+                        YuME_mapEditor.gridHeight -= YuME_mapEditor.globalScale;
+                    }
                 }
                 else
                 {
-                    YuME_mapEditor.gridHeight -= YuME_mapEditor.globalScale;
+                    if (Event.current.delta.y >= 0f)
+                    {
+                        YuME_mapEditor.gridHeight -= YuME_mapEditor.globalScale;
+                    }
+                    else
+                    {
+                        YuME_mapEditor.gridHeight += YuME_mapEditor.globalScale;
+                    }
                 }
             }
             else
             {
-                if (Event.current.delta.y >= 0f)
+                if (!YuME_mapEditor.editorData.twoPointFiveDMode)
                 {
-                    YuME_mapEditor.gridHeight -= YuME_mapEditor.globalScale;
+                    if (Event.current.delta.y >= 0f)
+                    {
+                        YuME_mapEditor.gridHeight -= YuME_mapEditor.globalScale;
+                    }
+                    else
+                    {
+                        YuME_mapEditor.gridHeight += YuME_mapEditor.globalScale;
+                    }
                 }
                 else
                 {
-                    YuME_mapEditor.gridHeight += YuME_mapEditor.globalScale;
+                    if (Event.current.delta.y >= 0f)
+                    {
+                        YuME_mapEditor.gridHeight += YuME_mapEditor.globalScale;
+                    }
+                    else
+                    {
+                        YuME_mapEditor.gridHeight -= YuME_mapEditor.globalScale;
+                    }
                 }
             }
 

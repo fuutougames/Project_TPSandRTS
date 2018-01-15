@@ -47,7 +47,6 @@ class YuME_tileImporter : EditorWindow
         // ----------------------------------------------------------------------------------------------------
 
         string[] guids;
-
 		guids = AssetDatabase.FindAssets("YuME_editorSetupData");
 		editorData = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(YuME_editorData)) as YuME_editorData;
 
@@ -69,7 +68,6 @@ class YuME_tileImporter : EditorWindow
             // load the settings
             userSettings = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(YuME_importerSettings)) as YuME_importerSettings;
         }
-
     }
 
     void OnGUI()
@@ -127,6 +125,20 @@ class YuME_tileImporter : EditorWindow
         EditorGUILayout.BeginVertical("box");
 
         userSettings.tileStatic = EditorGUILayout.Toggle("Set Tiles as Static", userSettings.tileStatic);
+
+        EditorGUILayout.EndVertical();
+
+        // ----------------------------------------------------------------------------------------------------
+        // ------ Alt Settings
+        // ----------------------------------------------------------------------------------------------------
+
+        EditorGUILayout.Space();
+
+        EditorGUILayout.LabelField("ALT Tile Setting", EditorStyles.boldLabel);
+
+        EditorGUILayout.BeginVertical("box");
+
+        userSettings.altIdentifier = EditorGUILayout.TextField("Alternative Tile Identifier", userSettings.altIdentifier);
 
         EditorGUILayout.EndVertical();
 
@@ -444,22 +456,51 @@ class YuME_tileImporter : EditorWindow
 
                         attachCustomCollisionMesh(); // check if the object has a custom collision mesh and perform setup
 
-                        // Try and load an exisiting version of the prefab
-                        Object prefabAlreadyCreated = AssetDatabase.LoadAssetAtPath(userSettings.destinationFolder + "/" + userSettings.appendName + child.name + "_YuME.prefab", typeof(GameObject));
-
-                        // Check if the prefab already exisits and update it - or create a new prefab
-                        if (prefabAlreadyCreated != null)
+                        if (!tileParentObject.name.Contains(userSettings.altIdentifier))
                         {
-                            updatedPrefabsCounter++; // increment the counter of updated prefabs for the finished log
-                            PrefabUtility.ReplacePrefab(tileParentObject, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased); // replace the existing prefab with the updated data
+                            // Try and load an exisiting version of the prefab
+                            Object prefabAlreadyCreated = AssetDatabase.LoadAssetAtPath(userSettings.destinationFolder + "/" + userSettings.appendName + child.name + "_YuME.prefab", typeof(GameObject));
+
+                            // Check if the prefab already exisits and update it - or create a new prefab
+                            if (prefabAlreadyCreated != null)
+                            {
+                                updatedPrefabsCounter++; // increment the counter of updated prefabs for the finished log
+                                PrefabUtility.ReplacePrefab(tileParentObject, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased); // replace the existing prefab with the updated data
+                            }
+                            else
+                            {
+                                newPrefabsCounter++; // increment the counter of new prefabs for the finished log
+                                PrefabUtility.CreatePrefab(userSettings.destinationFolder + "/" + tileParentObject.name + "_YuME.prefab", tileParentObject);
+                            }
+
+                            tilesetData.tileData.Add(userSettings.destinationFolder + "/" + tileParentObject.name + "_YuME.prefab");
                         }
                         else
                         {
-                            newPrefabsCounter++; // increment the counter of new prefabs for the finished log
-                            PrefabUtility.CreatePrefab(userSettings.destinationFolder + "/" + tileParentObject.name + "_YuME.prefab", tileParentObject);
-                        }
+                            string[] masterTileName = tileParentObject.name.Split(new string[] { userSettings.altIdentifier }, System.StringSplitOptions.None);
+                            masterTileName[0] += "_YuME";
 
-                        tilesetData.tileData.Add(userSettings.destinationFolder + "/" + tileParentObject.name + "_YuME.prefab");
+                            if (!AssetDatabase.IsValidFolder(userSettings.destinationFolder + "/" + masterTileName[0]))
+                            {
+                                AssetDatabase.CreateFolder(userSettings.destinationFolder, masterTileName[0]);
+                            }
+
+                            Object prefabAlreadyCreated = AssetDatabase.LoadAssetAtPath(userSettings.destinationFolder + "/" + masterTileName[0] + "/" + userSettings.appendName + child.name + "_YuME.prefab", typeof(GameObject));
+
+                            // Check if the prefab already exisits and update it - or create a new prefab
+                            if (prefabAlreadyCreated != null)
+                            {
+                                updatedPrefabsCounter++; // increment the counter of updated prefabs for the finished log
+                                PrefabUtility.ReplacePrefab(tileParentObject, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased); // replace the existing prefab with the updated data
+                            }
+                            else
+                            {
+                                newPrefabsCounter++; // increment the counter of new prefabs for the finished log
+                                PrefabUtility.CreatePrefab(userSettings.destinationFolder + "/" + masterTileName[0] + "/" + tileParentObject.name + "_YuME.prefab", tileParentObject);
+                            }
+
+                            tilesetData.tileData.Add(userSettings.destinationFolder + "/" + masterTileName[0] + "/" + tileParentObject.name + "_YuME.prefab");
+                        }
 
                         tileImportProgress++;
                     }
