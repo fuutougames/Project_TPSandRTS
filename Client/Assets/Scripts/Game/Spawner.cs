@@ -31,7 +31,8 @@ public class Spawner : MonoBase
     bool isCamping;
     bool isDisabled;
 
-    public event System.Action<int> OnNewWave; 
+    public event System.Action<int> OnNewWave;
+    public event System.Action OnWaveEnd;
 
     protected override void OnAwake()
     {
@@ -41,6 +42,7 @@ public class Spawner : MonoBase
         playerEntity = FindObjectOfType<Player>();
         playerEntity.OnDeath += OnPlayerDeath;
         playerT = playerEntity.transform;
+        //playerT.gameObject.SetActive(false);
         nextCampCheckTime = timeBetweenCampingChecks + Time.time;
         campPositionOld = playerT.position;
     }
@@ -49,13 +51,14 @@ public class Spawner : MonoBase
     protected override void OnStart()
     {
         base.OnStart();
-        NextWave();
+        //NextWave();
     }
 
     protected override void OnUpdate()
     {
         base.OnUpdate();
         if (isDisabled) return;
+        if (currentWave == null) return;
 
         if(Time.time > nextCampCheckTime)
         {
@@ -92,26 +95,34 @@ public class Spawner : MonoBase
     {
         float spawnDelay = 1;
         float tileFlashSpeed = 4;
-        Transform spawnTile = map.GetRandomOpenTile();
-        if(isCamping)
-        {
-            spawnTile = map.GetTileFromPosition(playerT.position);
-        }
-        Material tileMat = spawnTile.GetComponent<Renderer>().material;
-        Color initialColor = Color.white;
-        Color flashColor = Color.red;
+        //Transform spawnTile = map.GetRandomOpenTile();
+        //if(isCamping)
+        //{
+        //    spawnTile = map.GetTileFromPosition(playerT.position);
+        //}
+        //Material tileMat = spawnTile.GetComponent<Renderer>().material;
+        //Color initialColor = Color.white;
+        //Color flashColor = Color.red;
         float spawnTimer = 0;
 
         while(spawnTimer < spawnDelay)
         {
-            tileMat.color = Color.Lerp(initialColor, flashColor, Mathf.PingPong(spawnTimer * tileFlashSpeed, 1));
+            //tileMat.color = Color.Lerp(initialColor, flashColor, Mathf.PingPong(spawnTimer * tileFlashSpeed, 1));
             spawnTimer += Time.deltaTime;
             yield return null;
         }
 
-        Enemy spawnedEnemey = Instantiate(enemyPrefab, spawnTile.position + Vector3.up, Quaternion.identity) as Enemy;
+        Vector3 spawnPos = map.GetRandomOpenPos();
+        //Enemy spawnedEnemey = Instantiate(enemyPrefab, spawnTile.position + Vector3.up, Quaternion.identity) as Enemy;
+        Enemy spawnedEnemey = Instantiate(enemyPrefab, spawnPos + Vector3.up, Quaternion.identity) as Enemy;
         spawnedEnemey.OnDeath += OnEnemyDeath;
-        spawnedEnemey.SetCharacteristics(currentWave.moveSpeed, currentWave.hitsToKillPlayer, currentWave.enemyHealth, currentWave.skinColor);
+        spawnedEnemey.SetCharacteristics(currentWave.moveSpeed, 
+                                         currentWave.hitsToKillPlayer, 
+                                         currentWave.enemyHealth, 
+                                         currentWave.skinColor);
+
+        Vector3 partolTragetPos = map.GetRandomOpenPosFromeRegion(spawnPos, 10);
+        spawnedEnemey.SetPartolPath(partolTragetPos + Vector3.up);
     }
 
     private void OnPlayerDeath()
@@ -124,7 +135,11 @@ public class Spawner : MonoBase
         enemiesRemainingAlive--;
         if(enemiesRemainingAlive == 0)
         {
-            NextWave();
+            //NextWave();
+            if (OnWaveEnd != null)
+            {
+                OnWaveEnd();
+            }
         }
     }
 
@@ -133,7 +148,7 @@ public class Spawner : MonoBase
         playerT.position = map.GetCenterPosition() + Vector3.up * 3; //map.GetTileFromPosition(Vector3.zero).position + Vector3.up * 3;
     }
 
-    void NextWave()
+    public void NextWave()
     {
         if(currentWaveNumber > 0)
         {

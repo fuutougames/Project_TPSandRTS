@@ -10,7 +10,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class Enemy : LivingEntity
 {
-    public enum State { Idle, Chasing, Attacking};
+    public enum State { Idle, Partol , Chasing, Attacking};
     private State currentState;
 
     private NavMeshAgent pathfinder;
@@ -36,41 +36,52 @@ public class Enemy : LivingEntity
         base.OnAwake();
         pathfinder = GetComponent<NavMeshAgent>();     
         deathEffect = ResourceManager.Instance.LoadResource<ParticleSystem>("Prefabs/EnemyDeathEffect");
-        GameObject go_target = GameObject.FindGameObjectWithTag("Player");
-        if (go_target != null)
-        {
-            hasTarget = true;
-            target = go_target.transform;
-            targetEntity = target.GetComponent<LivingEntity>();
-            myCollisionRadius = GetComponent<CapsuleCollider>().radius;
-            targetCollisionRadius = target.GetComponent<CapsuleCollider>().radius;
-        }
+        //GameObject go_target = GameObject.FindGameObjectWithTag("Player");
+        //if (go_target != null)
+        //{
+        //    hasTarget = true;
+        //    target = go_target.transform;
+        //    targetEntity = target.GetComponent<LivingEntity>();
+        //    myCollisionRadius = GetComponent<CapsuleCollider>().radius;
+        //    targetCollisionRadius = target.GetComponent<CapsuleCollider>().radius;
+        //}
     }
 
     protected override void OnStart()
     {
         base.OnStart();
 
-        if(hasTarget)
-        {
-            currentState = State.Chasing;
-            targetEntity.OnDeath += OnTargetEntity;
-            StartCoroutine(UpdatePath());
-        }
+        //if(hasTarget)
+        //{
+        //    currentState = State.Chasing;
+        //    targetEntity.OnDeath += OnTargetEntity;
+        //    StartCoroutine(UpdatePath());
+        //}
     }
 
     protected override void OnUpdate()
     {
         base.OnUpdate();
         if (!hasTarget) return;
-        if(Time.time > nextAttackTime)
+        if(currentState == State.Partol)
         {
-            sqrDstToTarget = (target.position - transform.position).sqrMagnitude;
-            if (sqrDstToTarget < Mathf.Pow(attackDisanceThreshold + myCollisionRadius + targetCollisionRadius, 2))
+            float distance = Vector3.Distance(target.position, transform.position);
+            if(distance < 0.01f)
             {
-                nextAttackTime = Time.time + timeBetweenAttacks;
-                AudioManager.Instance.PlaySound("EnemyAttack", transform.position);
-                StartCoroutine(Attack());
+                target = partolStartPoint.transform;
+            }
+        }
+        else if(currentState == State.Chasing)
+        {
+            if (Time.time > nextAttackTime)
+            {
+                sqrDstToTarget = (target.position - transform.position).sqrMagnitude;
+                if (sqrDstToTarget < Mathf.Pow(attackDisanceThreshold + myCollisionRadius + targetCollisionRadius, 2))
+                {
+                    nextAttackTime = Time.time + timeBetweenAttacks;
+                    AudioManager.Instance.PlaySound("EnemyAttack", transform.position);
+                    StartCoroutine(Attack());
+                }
             }
         }
     }
@@ -96,6 +107,26 @@ public class Enemy : LivingEntity
         skinMaterial = GetComponent<Renderer>().material;
         skinMaterial.color = skinColor;
         originalColor = skinMaterial.color;
+    }
+
+    private GameObject partolStartPoint;
+    private GameObject partolEndPoint;
+
+    public void SetPartolPath(Vector3 endPointPos)
+    {
+        // Set Partol Start Point
+        partolStartPoint = new GameObject();
+        partolStartPoint.transform.position = this.transform.position;
+
+        // Set Partol End Point
+        partolEndPoint = new GameObject();
+        partolEndPoint.transform.position = endPointPos;
+
+        // Start Partol
+        target = partolEndPoint.transform;
+        hasTarget = true;
+        currentState = State.Partol;
+        StartCoroutine(UpdatePath());
     }
 
     private Vector3 originalPosition;
@@ -141,7 +172,7 @@ public class Enemy : LivingEntity
         updateWait = new WaitForSeconds(refreshRate);
         while (hasTarget)
         {
-            if(currentState == State.Chasing)
+            if(currentState == State.Chasing || currentState == State.Partol)
             {
                 if (!dead)
                 {

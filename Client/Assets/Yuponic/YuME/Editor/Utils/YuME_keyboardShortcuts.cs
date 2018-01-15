@@ -153,14 +153,6 @@ public class YuME_keyboardShortcuts : EditorWindow
                     Event.current.Use();
                     YuME_mapEditor.tileRotation += 90f;
                     break;
-                case KeyCode.N:
-                    Event.current.Use();
-                    YuME_mapEditor.tileRotationX -= 90f;
-                    break;
-                case KeyCode.M:
-                    Event.current.Use();
-                    YuME_mapEditor.tileRotationX += 90f;
-                    break;
                 case KeyCode.I:
                     Event.current.Use();
                     YuME_tileFunctions.isolateTilesToggle();
@@ -173,11 +165,26 @@ public class YuME_keyboardShortcuts : EditorWindow
                     Event.current.Use();
                     YuME_tileFunctions.flipHorizontal();
                     break;
+                case KeyCode.B:
+                    Event.current.Use();
+                    YuME_mapEditor.tileRotationX -= 90f;
+                    break;
+                case KeyCode.N:
+                    Event.current.Use();
+                    YuME_mapEditor.tileRotationX += 90f;
+                    break;
                 case KeyCode.Space:
     				if (YuME_mapEditor.selectedTool == YuME_mapEditor.toolIcons.selectTool || YuME_mapEditor.selectedTool == YuME_mapEditor.toolIcons.defaultTools)
                     {
                         Event.current.Use();
                         YuME_tileFunctions.selectAllTiles();
+                    }
+                    break;
+                case KeyCode.R:
+                    if (YuME_mapEditor.selectedTool == YuME_mapEditor.toolIcons.brushTool)
+                    {
+                        Event.current.Use();
+                        YuME_mapEditor.randomRotationMode = !YuME_mapEditor.randomRotationMode;
                     }
                     break;
             }

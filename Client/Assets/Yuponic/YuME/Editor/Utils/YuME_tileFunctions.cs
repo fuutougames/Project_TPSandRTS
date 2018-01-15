@@ -2,6 +2,7 @@
 using UnityEditor;
 using System;
 using UnityEditor.SceneManagement;
+using System.Linq;
 
 public class YuME_tileFunctions : EditorWindow 
 {
@@ -15,9 +16,50 @@ public class YuME_tileFunctions : EditorWindow
 
 		if (YuME_mapEditor.findTileMapParent())
 		{
-            placedTile = PrefabUtility.InstantiatePrefab(YuME_mapEditor.currentTile as GameObject) as GameObject;
+            if (YuME_mapEditor.useAltTiles == true)
+            {
+                YuME_mapEditor.s_AltTiles checkAltTiles = new YuME_mapEditor.s_AltTiles();
+
+                try
+                {
+                    checkAltTiles = YuME_mapEditor.altTiles.Single(s => s.masterTile == YuME_mapEditor.currentTile.name);
+                }
+                catch
+                {
+                }
+
+                if (checkAltTiles.masterTile != null)
+                {
+                    int randomTile = UnityEngine.Random.Range(0, checkAltTiles.altTileObjects.Length + 1);
+                    if (randomTile < checkAltTiles.altTileObjects.Length)
+                    {
+                        placedTile = PrefabUtility.InstantiatePrefab(checkAltTiles.altTileObjects[randomTile] as GameObject) as GameObject;
+                    }
+                    else
+                    {
+                        placedTile = PrefabUtility.InstantiatePrefab(YuME_mapEditor.currentTile as GameObject) as GameObject;
+                    }
+                }
+                else
+                {
+                    placedTile = PrefabUtility.InstantiatePrefab(YuME_mapEditor.currentTile as GameObject) as GameObject;
+                }
+            }
+            else
+            {
+                placedTile = PrefabUtility.InstantiatePrefab(YuME_mapEditor.currentTile as GameObject) as GameObject;
+            }
+
             Undo.RegisterCreatedObjectUndo(placedTile, "Placed Tile");
-            placedTile.transform.eulerAngles = new Vector3(YuME_mapEditor.tileRotationX, YuME_mapEditor.tileRotation, 0f);
+            if(YuME_mapEditor.randomRotationMode)
+            {
+                placedTile.transform.eulerAngles = new Vector3(UnityEngine.Random.Range(0,4) * 90f, UnityEngine.Random.Range(0, 4) * 90f, UnityEngine.Random.Range(0, 4) * 90f);
+            }
+            else
+            {
+                placedTile.transform.eulerAngles = new Vector3(YuME_mapEditor.tileRotationX, YuME_mapEditor.tileRotation, 0f);
+            }
+
             placedTile.transform.position = position;
             placedTile.transform.localScale = YuME_mapEditor.brushTile.transform.localScale;
 			placedTile.transform.parent = YuME_mapEditor.mapLayers[YuME_mapEditor.currentLayer-1].transform;
@@ -70,17 +112,18 @@ public class YuME_tileFunctions : EditorWindow
                         pickRotation = currentLayer.transform.GetChild(i).eulerAngles.y;
                     }
 
-
-                    if (currentLayer.transform.GetChild(i).transform.eulerAngles.x> 0)
+                    if (currentLayer.transform.GetChild(i).transform.eulerAngles.x > 0)
                     {
                         pickRotationX = currentLayer.transform.GetChild(i).eulerAngles.x;
                     }
+
 
                     YuME_mapEditor.currentBrushIndex = Array.IndexOf(YuME_mapEditor.currentTileSetObjects, YuME_mapEditor.currentTile);
                     YuME_mapEditor.currentTile.transform.localScale = currentLayer.transform.GetChild(i).gameObject.transform.localScale;
                     YuME_mapEditor.tileRotation = pickRotation;
                     YuME_mapEditor.tileRotationX = pickRotationX;
                     YuME_brushFunctions.updateBrushTile();
+                    YuME_mapEditor.currentBrushType = YuME_mapEditor.brushTypes.standardBrush;
                     YuME_mapEditor.selectedTool = YuME_mapEditor.toolIcons.brushTool;
 
                     return;
@@ -92,35 +135,29 @@ public class YuME_tileFunctions : EditorWindow
     public static void flipHorizontal()
     {
         Undo.RecordObject(YuME_mapEditor.brushTile.transform, "Flip Horizontal");
-        Vector3 tempScale = YuME_mapEditor.brushTile.transform.localScale;
 
-        if(tempScale.x == 1f)
+        if (YuME_mapEditor.tileScale.x == 1f)
         {
-            tempScale.x = -1f;
+            YuME_mapEditor.tileScale.x = -1f;
         }
         else
         {
-            tempScale.x = 1f;
+            YuME_mapEditor.tileScale.x = 1f;
         }
-
-        YuME_mapEditor.brushTile.transform.localScale = tempScale;
     }
 
     public static void flipVertical()
     {
         Undo.RecordObject(YuME_mapEditor.brushTile.transform, "Flip Vertical");
-        Vector3 tempScale = YuME_mapEditor.brushTile.transform.localScale;
 
-        if (tempScale.z == 1f)
+        if (YuME_mapEditor.tileScale.z == 1f)
         {
-            tempScale.z = -1f;
+            YuME_mapEditor.tileScale.z = -1f;
         }
         else
         {
-            tempScale.z = 1f;
+            YuME_mapEditor.tileScale.z = 1f;
         }
-
-        YuME_mapEditor.brushTile.transform.localScale = tempScale;
     }
 
     public static void selectTile(Vector3 position)

@@ -12,11 +12,11 @@ public class YuME_brushFunctions : EditorWindow
 			YuME_mapEditor.brushTile.transform.eulerAngles = new Vector3(YuME_mapEditor.tileRotationX, YuME_mapEditor.tileRotation, 0f);
             if (YuME_mapEditor.currentBrushType == YuME_mapEditor.brushTypes.standardBrush)
             {
-                YuME_mapEditor.brushTile.transform.localScale = new Vector3(YuME_mapEditor.globalScale, YuME_mapEditor.globalScale, YuME_mapEditor.globalScale);
+                YuME_mapEditor.brushTile.transform.localScale = Vector3.Scale(new Vector3(YuME_mapEditor.globalScale, YuME_mapEditor.globalScale, YuME_mapEditor.globalScale), YuME_mapEditor.tileScale);
             }
             else
             {
-                YuME_mapEditor.brushTile.transform.localScale = Vector3.one;
+                YuME_mapEditor.brushTile.transform.localScale = Vector3.Scale(Vector3.one, YuME_mapEditor.tileScale);
             }
 
             if (YuME_mapEditor.eraseToolOverride || YuME_mapEditor.pickToolOverride)

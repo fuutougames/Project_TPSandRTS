@@ -11,6 +11,7 @@ public class GameUI : MonoBase
     private Button playButton;
     private Button returnButton;
     private Transform gameOverUI;
+    private Transform gameResultUI;
 
     public RectTransform newWaveBanner;
     public Text newWaveTitle;
@@ -28,6 +29,8 @@ public class GameUI : MonoBase
 
         fadePlane = this.transform.Find("Fade").GetComponent<Image>();
         gameOverUI = this.transform.Find("GameOverUI");
+        gameResultUI = this.transform.Find("GameResultUI");
+
         playButton = gameOverUI.Find("PlayAgainButton").GetComponent<Button>();
         playButton.onClick.AddListener(StartNewGame);
         returnButton = gameOverUI.Find("ReturnToMenuButton").GetComponent<Button>();
@@ -100,6 +103,17 @@ public class GameUI : MonoBase
         base.OnStart();
         player = FindObjectOfType<Player>();
         player.OnDeath += OnGameOver;
+
+        spawner.OnWaveEnd += Spawner_OnWaveEnd;
+    }
+
+    private void Spawner_OnWaveEnd()
+    {
+        Cursor.visible = true;
+        StartCoroutine(Fade(Color.clear, new Color(0, 0, 0, .95f), 1));
+        scoreUI.gameObject.SetActive(false);
+        healthBar.transform.parent.gameObject.SetActive(false);
+        gameResultUI.gameObject.SetActive(true);
     }
 
     private void OnGameOver()
@@ -135,5 +149,15 @@ public class GameUI : MonoBase
     private void ReturnToMenu()
     {
         SceneManager.LoadSceneAsync("Menu");
+    }
+
+    public void PlayAgain()
+    {
+        SceneManager.LoadSceneAsync("Game3");
+    }
+
+    public void BackToBase()
+    {
+        SceneManager.LoadSceneAsync("Basement");
     }
 }

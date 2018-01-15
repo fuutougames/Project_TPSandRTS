@@ -19,6 +19,13 @@ public class YuME_editorSceneUI : EditorWindow
 
         GUI.skin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene);
 
+        if (YuME_mapEditor.randomRotationMode)
+        {
+            var centeredStyle = GUI.skin.GetStyle("Label");
+            centeredStyle.alignment = TextAnchor.UpperCenter;
+            GUI.Label(new Rect(Screen.width / 2 - 250, 10, 500, 50), "Random rotation paint mode is on. Press R to toggle off.", centeredStyle);
+        }
+
         for (int i = 0; i < YuME_mapEditor.editorData.primaryIconData.Count; i++)
 		{
 			drawToolIcons(i);
